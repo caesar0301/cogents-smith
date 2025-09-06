@@ -1,0 +1,75 @@
+# This workflow will upload a Python Package using Hatch when a release is created
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Upload Python Package
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/cogents-tools
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y graphviz libgraphviz-dev pkg-config
+    
+    - name: Install Poetry
+      run: |
+        pip install poetry
+
+    - name: Install dependencies
+      run: |
+        poetry install --with dev
+    
+    - name: Verify version and run checks
+      run: |
+        # Version verification
+        POETRY_VERSION=$(poetry version -s)
+        RELEASE_TAG=${GITHUB_REF#refs/tags/}
+        if [[ "$RELEASE_TAG" == "v$POETRY_VERSION"* ]] || [[ "$RELEASE_TAG" == "$POETRY_VERSION"* ]]; then
+          echo "✅ Version match: RELEASE_TAG '$RELEASE_TAG' contains POETRY_VERSION '$POETRY_VERSION'"
+        else
+          echo "❌ Version mismatch: RELEASE_TAG '$RELEASE_TAG' should contain POETRY_VERSION '$POETRY_VERSION'"
+          exit 1
+        fi
+        # Run tests and quality checks
+        make test-unit
+    
+    - name: Build and verify package
+      run: |
+        make build
+        ls -la dist/
+        if [ ! -f dist/*.whl ] || [ ! -f dist/*.tar.gz ]; then
+          echo "❌ Missing build artifacts"
+          exit 1
+        fi
+    
+    - name: Publish package to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        verbose: true
+        print-hash: true

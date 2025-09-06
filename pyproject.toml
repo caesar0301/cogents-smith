@@ -1,0 +1,146 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "cogents-tools"
+version = "0.1.0"
+description = "Supportive tools for Cogents, towards a cognitive agentic system"
+readme = "README.md"
+license = "MIT"
+authors = ["Xiaming Chen <chenxm35@gmail.com>"]
+maintainers = ["Xiaming Chen <chenxm35@gmail.com>"]
+keywords = ["agents", "multi-agent system", "cognition", "artificial intelligence"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+packages = [{include = "cogents_tools"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+cogents-core = "^0.1.6,<0.2.0"
+aiohttp = "^3.9.0"  # Common HTTP client
+
+# LLM tracing
+opik = { version = "^0.2.0", optional = true }
+
+# Vector store
+weaviate-client = { version = "^4.16.9", optional = true }
+
+# === Academic Research Group ===
+# arxiv_toolkit dependencies
+arxiv = { version = "^2.2.0", optional = true }
+
+# === Image Processing Group ===
+# image_toolkit dependencies  
+pillow = { version = "^10.0.0", optional = true }
+
+# === Audio Processing Group ===
+# audio_aliyun_toolkit dependencies
+aliyun-python-sdk-core = { version = "^2.13.1,<3.0.0", optional = true }
+
+# === Development Tools Group ===
+# bash_toolkit, python_executor_toolkit dependencies
+matplotlib = { version = "^3.8.0", optional = true }
+pexpect = { version = "^4.9.0", optional = true }
+ipython = { version = "^8.18.0", optional = true }
+
+# === File Processing Group ===
+# document_toolkit, tabular_data_toolkit dependencies
+pandas = { version = "^2.0.0", optional = true }
+pymupdf = { version = "^1.23.0", optional = true }
+openpyxl = { version = "^3.1.5", optional = true }
+
+# === Communication Group ===
+# gmail_toolkit dependencies
+google-api-python-client = { version = "^2.0.0", optional = true }
+google-auth-oauthlib = { version = "^1.0.0", optional = true }
+google-auth = { version = "^2.0.0", optional = true }
+aiofiles = { version = "^24.1.0", optional = true }
+
+# === Information Retrieval Group ===
+# search_toolkit, serper_toolkit, wikipedia_toolkit dependencies
+tavily-python = { version = "^0.3.0", optional = true }
+langchain-tavily = { version = "^0.2.11", optional = true }
+wikipedia-api = { version = "^0.6.0", optional = true }
+
+# === Memory/Persistence Group ===
+# memory_toolkit dependencies
+psycopg2 = { version = "^2.9.10", optional = true }
+psycopg2-binary = { version = "^2.9.0", optional = true }
+
+[tool.poetry.extras]
+# Semantic toolkit groups - install only what you need
+academic = ["arxiv"]
+image = ["pillow"]
+video = []  # No additional deps yet
+audio = ["aliyun-python-sdk-core"]
+development = ["matplotlib", "pexpect", "ipython"]
+file_processing = ["pandas", "pymupdf", "openpyxl"]
+communication = ["google-api-python-client", "google-auth-oauthlib", "google-auth", "aiofiles"]
+info_retrieval = ["tavily-python", "langchain-tavily", "wikipedia-api"]
+memorization = ["psycopg2", "psycopg2-binary"]
+hitl = []  # No additional deps
+
+# Convenience groups
+all = [
+    "arxiv", "pillow", "aliyun-python-sdk-core", "matplotlib", "pexpect", "ipython",
+    "pandas", "pymupdf", "openpyxl", "google-api-python-client", "google-auth-oauthlib",
+    "google-auth", "aiofiles", "tavily-python", "langchain-tavily", "wikipedia-api",
+    "opik", "psycopg2", "psycopg2-binary", "weaviate-client"
+]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.2,<9"
+pytest-cov = "^4.0.0"
+pytest-asyncio = "^1.1.0"
+pytest-tornasync = "^0.6.0.post2"
+pytest-trio = "^0.8.0"
+pytest-twisted = "^1.14.3"
+twisted = "^25.5.0"
+black = "^23.0.0"
+isort = "^5.12.0"
+flake8 = "^7.3.0"
+autoflake = "^2.3.1"
+
+[tool.poetry.urls]
+Homepage = "https://github.com/caesar0301/cogents-tools"
+Repository = "https://github.com/caesar0301/cogents-tools"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["cogents_tools"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+] 
