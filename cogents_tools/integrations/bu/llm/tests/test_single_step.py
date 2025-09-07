@@ -1,0 +1,194 @@
+import logging
+import tempfile
+
+import pytest
+
+from cogents_tools.integrations.bu.agent.prompts import AgentMessagePrompt
+from cogents_tools.integrations.bu.agent.service import Agent
+from cogents_tools.integrations.bu.browser.views import BrowserStateSummary, TabInfo
+from cogents_tools.integrations.bu.dom.views import (
+    DOMSelectorMap,
+    EnhancedDOMTreeNode,
+    NodeType,
+    SerializedDOMState,
+    SimplifiedNode,
+)
+from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
+from cogents_tools.integrations.bu.llm.anthropic.chat import ChatAnthropic
+from cogents_tools.integrations.bu.llm.azure.chat import ChatAzureOpenAI
+from cogents_tools.integrations.bu.llm.base import BaseChatModel
+from cogents_tools.integrations.bu.llm.google.chat import ChatGoogle
+from cogents_tools.integrations.bu.llm.groq.chat import ChatGroq
+from cogents_tools.integrations.bu.llm.openai.chat import ChatOpenAI
+
+# Set logging level to INFO for this module
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
+def create_mock_state_message(temp_dir: str):
+    """Create a mock state message with a single clickable element."""
+
+    # Create a mock DOM element with a single clickable button
+    mock_button = EnhancedDOMTreeNode(
+        node_id=1,
+        backend_node_id=1,
+        node_type=NodeType.ELEMENT_NODE,
+        node_name="button",
+        node_value="Click Me",
+        attributes={"id": "test-button"},
+        is_scrollable=False,
+        is_visible=True,
+        absolute_position=None,
+        session_id=None,
+        target_id="ABCD1234ABCD1234ABCD1234ABCD1234ABCD1234",
+        frame_id=None,
+        content_document=None,
+        shadow_root_type=None,
+        shadow_roots=None,
+        parent_node=None,
+        children_nodes=None,
+        ax_node=None,
+        snapshot_node=None,
+    )
+
+    # Create selector map
+    selector_map: DOMSelectorMap = {1: mock_button}
+
+    # Create mock tab info with proper target_id
+    mock_tab = TabInfo(
+        target_id="ABCD1234ABCD1234ABCD1234ABCD1234ABCD1234",
+        url="https://example.com",
+        title="Test Page",
+    )
+
+    dom_state = SerializedDOMState(
+        _root=SimplifiedNode(
+            original_node=mock_button,
+            children=[],
+            should_display=True,
+            interactive_index=1,
+        ),
+        selector_map=selector_map,
+    )
+
+    # Create mock browser state with required selector_map
+    mock_browser_state = BrowserStateSummary(
+        dom_state=dom_state,  # Using the actual DOM element
+        url="https://example.com",
+        title="Test Page",
+        tabs=[mock_tab],
+        screenshot="",  # Empty screenshot
+        pixels_above=0,
+        pixels_below=0,
+    )
+
+    # Create file system using the provided temp directory
+    mock_file_system = FileSystem(temp_dir)
+
+    # Create the agent message prompt
+    agent_prompt = AgentMessagePrompt(
+        browser_state_summary=mock_browser_state,
+        file_system=mock_file_system,  # Now using actual FileSystem instance
+        agent_history_description="",  # Empty history
+        read_state_description="",  # Empty read state
+        task="Click the button on the page",
+        include_attributes=["id"],
+        step_info=None,
+        page_filtered_actions=None,
+        max_clickable_elements_length=40000,
+        sensitive_data=None,
+    )
+
+    # Override the clickable_elements_to_string method to return our simple element
+    dom_state.llm_representation = lambda include_attributes=None: '[1]<button id="test-button">Click Me</button>'
+
+    # Get the formatted message
+    message = agent_prompt.get_user_message(use_vision=False)
+
+    return message
+
+
+# Pytest parameterized version
+@pytest.mark.parametrize(
+    "llm_class,model_name",
+    [
+        (ChatGroq, "meta-llama/llama-4-maverick-17b-128e-instruct"),
+        (ChatGoogle, "gemini-2.0-flash-exp"),
+        (ChatOpenAI, "gpt-4.1-mini"),
+        (ChatAnthropic, "claude-3-5-sonnet-latest"),
+        (ChatAzureOpenAI, "gpt-4.1-mini"),
+    ],
+)
+async def test_single_step_parametrized(llm_class, model_name):
+    """Test single step with different LLM providers using pytest parametrize."""
+    llm = llm_class(model=model_name)
+
+    agent = Agent(task="Click the button on the page", llm=llm)
+
+    # Create temporary directory that will stay alive during the test
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Create mock state message
+        mock_message = create_mock_state_message(temp_dir)
+
+        agent.message_manager._set_message_with_type(mock_message, "state")
+
+        messages = agent.message_manager.get_messages()
+
+        # Test with simple question
+        response = await llm.ainvoke(messages, agent.AgentOutput)
+
+        # Basic assertions to ensure response is valid
+        assert response.completion is not None
+        assert response.usage is not None
+        assert response.usage.total_tokens > 0
+
+
+async def test_single_step():
+    """Original test function that tests all models in a loop."""
+    # Create a list of models to test
+    models: list[BaseChatModel] = [
+        ChatGroq(model="meta-llama/llama-4-maverick-17b-128e-instruct"),
+        ChatGoogle(model="gemini-2.0-flash-exp"),
+        ChatOpenAI(model="gpt-4.1"),
+        ChatAnthropic(model="claude-3-5-sonnet-latest"),  # Using haiku for cost efficiency
+        ChatAzureOpenAI(model="gpt-4o-mini"),
+    ]
+
+    for llm in models:
+        print(f'\n{"=" * 60}')
+        print(f"Testing with model: {llm.provider} - {llm.model}")
+        print(f'{"=" * 60}\n')
+
+        agent = Agent(task="Click the button on the page", llm=llm)
+
+        # Create temporary directory that will stay alive during the test
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create mock state message
+            mock_message = create_mock_state_message(temp_dir)
+
+            # Print the mock message content to see what it looks like
+            print("Mock state message:")
+            print(mock_message.content)
+            print("\n" + "=" * 50 + "\n")
+
+            agent.message_manager._set_message_with_type(mock_message, "state")
+
+            messages = agent.message_manager.get_messages()
+
+            # Test with simple question
+            try:
+                response = await llm.ainvoke(messages, agent.AgentOutput)
+                logger.info(f"Response from {llm.provider}: {response.completion}")
+                logger.info(f"Actions: {str(response.completion.action)}")
+
+            except Exception as e:
+                logger.error(f"Error with {llm.provider}: {type(e).__name__}: {str(e)}")
+
+        print(f'\n{"=" * 60}\n')
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(test_single_step())

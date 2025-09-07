@@ -8,8 +8,8 @@ types of toolkits including built-in tools and MCP integration.
 import asyncio
 import os
 
-from cogents_core.utils.logging import get_logger, setup_logging
 from cogents_core.toolify import MCP_AVAILABLE, ToolkitConfig, ToolkitRegistry, get_toolkit, get_toolkits_map
+from cogents_core.utils.logging import get_logger, setup_logging
 
 # Set up logging
 setup_logging(level="INFO")
