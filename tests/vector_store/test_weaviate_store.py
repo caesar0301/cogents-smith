@@ -20,15 +20,15 @@ class TestWeaviateVectorStoreUnit:
     def test_required_methods_exist(self):
         """Test that all required methods exist on the class."""
         required_methods = [
-            "create_col",
+            "create_collection",
             "insert",
             "search",
             "delete",
             "update",
             "get",
-            "list_cols",
-            "delete_col",
-            "col_info",
+            "list_collections",
+            "delete_collection",
+            "collection_info",
             "list",
             "reset",
         ]
@@ -116,14 +116,14 @@ class TestWeaviateVectorStoreIntegration:
 
         # Cleanup
         try:
-            self.vectorstore.delete_col()
+            self.vectorstore.delete_collection()
         except Exception:
             pass
 
     def test_create_collection(self):
         """Test collection creation."""
         # Collection should be created in setup
-        cols = self.vectorstore.list_cols()
+        cols = self.vectorstore.list_collections()
         assert self.collection_name in cols
 
     def test_insert_and_get(self, test_vectors, test_payloads, test_ids):
@@ -224,9 +224,9 @@ class TestWeaviateVectorStoreIntegration:
         assert len(filtered_results) > 0
         assert all(result.payload.get("category") == "A" for result in filtered_results)
 
-    def test_col_info(self):
+    def test_collection_info(self):
         """Test collection information retrieval."""
-        info = self.vectorstore.col_info()
+        info = self.vectorstore.collection_info()
         assert isinstance(info, dict)
         assert "name" in info or "collection_name" in info
 
@@ -251,5 +251,5 @@ class TestWeaviateVectorStoreIntegration:
         assert result is None
 
         # Verify collection still exists
-        cols = self.vectorstore.list_cols()
+        cols = self.vectorstore.list_collections()
         assert self.collection_name in cols

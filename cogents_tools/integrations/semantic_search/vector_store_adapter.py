@@ -260,7 +260,7 @@ class VectorStoreAdapter:
             Dict[str, Any]: Collection statistics
         """
         try:
-            col_info = self.vector_store.col_info()
+            col_info = self.vector_store.collection_info()
             return {
                 "collection_name": getattr(self.vector_store, "collection_name", "unknown"),
                 "embedding_model_dims": self.vector_store.embedding_model_dims,

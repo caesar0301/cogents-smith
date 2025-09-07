@@ -60,7 +60,7 @@ class WeaviateVectorStore(BaseVectorStore):
         # Weaviate capitalizes the first letter of collection names, so we need to handle this
         self.collection_name = collection_name
         self.weaviate_collection_name = collection_name.capitalize()
-        self.create_col(embedding_model_dims)
+        self.create_collection(embedding_model_dims)
 
     def _parse_output(self, data: Dict) -> List[OutputData]:
         """
@@ -95,7 +95,7 @@ class WeaviateVectorStore(BaseVectorStore):
 
         return result
 
-    def create_col(self, vector_size: int, distance: str = "cosine") -> None:
+    def create_collection(self, vector_size: int, distance: str = "cosine") -> None:
         """
         Create a new collection with the specified schema.
 
@@ -289,7 +289,7 @@ class WeaviateVectorStore(BaseVectorStore):
         )
         return results
 
-    def list_cols(self) -> List[str]:
+    def list_collections(self) -> List[str]:
         """
         List all collections.
 
@@ -319,11 +319,11 @@ class WeaviateVectorStore(BaseVectorStore):
                 original_names.append(name[0].lower() + name[1:] if name else name)
         return original_names
 
-    def delete_col(self) -> None:
+    def delete_collection(self) -> None:
         """Delete a collection."""
         self.client.collections.delete(self.weaviate_collection_name)
 
-    def col_info(self) -> Dict[str, Any]:
+    def collection_info(self) -> Dict[str, Any]:
         """
         Get information about a collection.
 
@@ -379,5 +379,5 @@ class WeaviateVectorStore(BaseVectorStore):
     def reset(self) -> None:
         """Reset the index by deleting and recreating it."""
         logger.warning(f"Resetting index {self.collection_name}...")
-        self.delete_col()
-        self.create_col(self.embedding_model_dims)
+        self.delete_collection()
+        self.create_collection(self.embedding_model_dims)

@@ -11,8 +11,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
-from cogents_tools.integrations.vector_store import BaseVectorStore, get_vector_store
 from cogents_tools.integrations.search import BaseSearch, SearchResult, TavilySearchWrapper
+from cogents_tools.integrations.vector_store import BaseVectorStore, get_vector_store
 
 from .document_processor import ChunkingConfig, DocumentProcessor
 from .models import DocumentChunk

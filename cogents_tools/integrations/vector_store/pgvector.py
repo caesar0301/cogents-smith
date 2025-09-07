@@ -56,11 +56,11 @@ class PGVectorStore(BaseVectorStore):
         self.conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port)
         self.cur = self.conn.cursor()
 
-        collections = self.list_cols()
+        collections = self.list_collections()
         if collection_name not in collections:
-            self.create_col(embedding_model_dims)
+            self.create_collection(embedding_model_dims)
 
-    def create_col(self, vector_size: int, distance: str = "cosine") -> None:
+    def create_collection(self, vector_size: int, distance: str = "cosine") -> None:
         """
         Create a new collection (table in PostgreSQL).
         Will also initialize vector search index if specified.
@@ -222,7 +222,7 @@ class PGVectorStore(BaseVectorStore):
             return None
         return OutputData(id=str(result[0]), score=None, payload=result[2])
 
-    def list_cols(self) -> List[str]:
+    def list_collections(self) -> List[str]:
         """
         List all collections.
 
@@ -232,12 +232,12 @@ class PGVectorStore(BaseVectorStore):
         self.cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
         return [row[0] for row in self.cur.fetchall()]
 
-    def delete_col(self) -> None:
+    def delete_collection(self) -> None:
         """Delete a collection."""
         self.cur.execute(f"DROP TABLE IF EXISTS {self.collection_name}")
         self.conn.commit()
 
-    def col_info(self) -> Dict[str, Any]:
+    def collection_info(self) -> Dict[str, Any]:
         """
         Get information about a collection.
 
@@ -307,5 +307,5 @@ class PGVectorStore(BaseVectorStore):
     def reset(self) -> None:
         """Reset the index by deleting and recreating it."""
         logger.warning(f"Resetting index {self.collection_name}...")
-        self.delete_col()
-        self.create_col(self.embedding_model_dims)
+        self.delete_collection()
+        self.create_collection(self.embedding_model_dims)

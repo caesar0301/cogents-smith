@@ -48,7 +48,7 @@ class BaseVectorStore(ABC):
                 )
 
     @abstractmethod
-    def create_col(self, vector_size: int, distance: str = "cosine") -> None:
+    def create_collection(self, vector_size: int, distance: str = "cosine") -> None:
         """Create a new collection."""
 
     @abstractmethod
@@ -81,15 +81,15 @@ class BaseVectorStore(ABC):
         """Retrieve a vector by ID."""
 
     @abstractmethod
-    def list_cols(self) -> List[str]:
+    def list_collections(self) -> List[str]:
         """List all collections."""
 
     @abstractmethod
-    def delete_col(self) -> None:
+    def delete_collection(self) -> None:
         """Delete a collection."""
 
     @abstractmethod
-    def col_info(self) -> Dict[str, Any]:
+    def collection_info(self) -> Dict[str, Any]:
         """Get information about a collection."""
 
     @abstractmethod

@@ -22,15 +22,15 @@ class TestPGVectorStoreUnit:
     def test_required_methods_exist(self):
         """Test that all required methods exist on the class."""
         required_methods = [
-            "create_col",
+            "create_collection",
             "insert",
             "search",
             "delete",
             "update",
             "get",
-            "list_cols",
-            "delete_col",
-            "col_info",
+            "list_collections",
+            "delete_collection",
+            "collection_info",
             "list",
             "reset",
         ]
@@ -74,7 +74,7 @@ class TestPGVectorStoreUnit:
         mock_conn = Mock()
         mock_cursor = Mock()
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.fetchall.return_value = []  # For list_cols in __init__
+        mock_cursor.fetchall.return_value = []  # For list_collections in __init__
         mock_psycopg2.connect.return_value = mock_conn
 
         # Should be able to create instance
@@ -140,7 +140,7 @@ class TestPGVectorStoreIntegration:
 
         # Cleanup
         try:
-            self.vectorstore.delete_col()
+            self.vectorstore.delete_collection()
             self.vectorstore.conn.close()
         except Exception:
             pass
@@ -148,7 +148,7 @@ class TestPGVectorStoreIntegration:
     def test_create_collection(self):
         """Test collection creation."""
         # Collection should be created in setup
-        cols = self.vectorstore.list_cols()
+        cols = self.vectorstore.list_collections()
         assert self.collection_name in cols
 
     def test_insert_and_get(self):
@@ -270,9 +270,9 @@ class TestPGVectorStoreIntegration:
         assert len(filtered_results) > 0
         assert all(result.payload.get("category") == "A" for result in filtered_results)
 
-    def test_col_info(self):
+    def test_collection_info(self):
         """Test collection information retrieval."""
-        info = self.vectorstore.col_info()
+        info = self.vectorstore.collection_info()
         assert isinstance(info, dict)
         assert "name" in info or "table_name" in info or "collection_name" in info
 
@@ -297,7 +297,7 @@ class TestPGVectorStoreIntegration:
         assert result is None
 
         # Verify collection still exists
-        cols = self.vectorstore.list_cols()
+        cols = self.vectorstore.list_collections()
         assert self.collection_name in cols
 
     def test_batch_operations(self):

@@ -20,12 +20,12 @@ import sys
 from pathlib import Path
 
 # Add project root to Python path
-project_root = Path(__file__).parent.parent
+project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from cogents_tools.integrations.search import TavilySearchConfig, TavilySearchWrapper
 from cogents_tools.integrations.semantic_search import SemanticSearch, SemanticSearchConfig
 from cogents_tools.integrations.semantic_search.document_processor import ChunkingConfig
-from cogents_tools.integrations.search import TavilySearchConfig, TavilySearchWrapper
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -74,28 +74,68 @@ def create_search_system() -> SemanticSearch:
 def main():
     """Main example demonstrating semantic search features."""
 
-    # Check prerequisites
-    if not os.getenv("TAVILY_API_KEY"):
-        print("⚠️  TAVILY_API_KEY not set. Web search will not work.")
+    print("🚀 Semantic Search Demo Starting...")
+    print("=" * 70)
 
-    print("🚀 Initializing Semantic Search System...")
+    # Check prerequisites
+    print("🔧 Checking Prerequisites:")
+    tavily_key = os.getenv("TAVILY_API_KEY")
+    if tavily_key:
+        print(f"   ✅ TAVILY_API_KEY: Set ({tavily_key[:8]}...)")
+    else:
+        print("   ⚠️  TAVILY_API_KEY: Not set - web search will not work")
+
+    weaviate_url = os.getenv("WEAVIATE_URL", "http://localhost:8080")
+    print(f"   🔗 Weaviate URL: {weaviate_url}")
+
+    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    print(f"   🤖 Ollama URL: {ollama_url}")
+
+    print("\n🚀 Initializing Semantic Search System...")
 
     # Create and connect
     search_system = create_search_system()
 
     try:
+        print("🔌 Connecting to services...")
         if not search_system.connect():
-            print("❌ Failed to connect to Weaviate. Ensure it's running on localhost:8080")
+            print("❌ Failed to connect to Weaviate. Troubleshooting tips:")
+            print(f"   • Ensure Weaviate is running at {weaviate_url}")
+            print(
+                "   • For local setup: docker run -p 8080:8080 -e AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true semitechnologies/weaviate:latest"
+            )
+            print("   • Check network connectivity and firewall settings")
             return
 
         print("✅ Connected to Weaviate successfully!")
+        print("✅ Embedding service ready!")
 
         # 1. Basic search (with web fallback)
         print("\n" + "=" * 60)
         print("1. BASIC SEARCH (with web fallback)")
         print("=" * 60)
 
-        search_system.search("best travel destinations in Japan")
+        query = "best travel destinations in Japan"
+        print(f"🔍 Searching for: '{query}'")
+
+        result = search_system.search(query)
+        print(f"📊 Search Results:")
+        print(f"   • Total results: {result.total_results}")
+        print(f"   • Local results: {result.local_results}")
+        print(f"   • Web results: {result.web_results}")
+        print(f"   • Search time: {result.search_time:.2f}s")
+        print(f"   • Cached: {result.cached}")
+
+        if result.chunks:
+            print(f"📝 Top results:")
+            for i, (chunk, score) in enumerate(result.chunks[:3], 1):
+                print(f"   {i}. [{chunk.source}] Score: {score:.3f}")
+                content_preview = (
+                    chunk.content[:100].replace("\n", " ") + "..." if len(chunk.content) > 100 else chunk.content
+                )
+                print(f"      {content_preview}")
+        else:
+            print("   No results found")
 
         # 2. Manual document storage
         print("\n" + "=" * 60)
@@ -127,7 +167,29 @@ def main():
         print("3. SEARCH STORED DOCUMENT")
         print("=" * 60)
 
-        search_system.search("medical imaging analysis")
+        query = "medical imaging analysis"
+        print(f"🔍 Searching for: '{query}'")
+
+        result = search_system.search(query)
+        print(f"📊 Search Results:")
+        print(f"   • Total results: {result.total_results}")
+        print(f"   • Local results: {result.local_results}")
+        print(f"   • Web results: {result.web_results}")
+        print(f"   • Search time: {result.search_time:.2f}s")
+        print(f"   • Cached: {result.cached}")
+
+        if result.chunks:
+            print(f"📝 Found content:")
+            for i, (chunk, score) in enumerate(result.chunks[:3], 1):
+                print(f"   {i}. [{chunk.source}] Score: {score:.3f}")
+                content_preview = (
+                    chunk.content[:100].replace("\n", " ") + "..." if len(chunk.content) > 100 else chunk.content
+                )
+                print(f"      {content_preview}")
+                if chunk.metadata:
+                    print(f"      Metadata: {chunk.metadata}")
+        else:
+            print("   No results found")
 
         # 4. System statistics
         print("\n" + "=" * 60)
