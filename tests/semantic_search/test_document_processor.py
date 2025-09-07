@@ -10,8 +10,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from cogents_tools.semantic_search.document_processor import ChunkingConfig, DocumentProcessor, ProcessedDocument
-from cogents_tools.semantic_search.models import DocumentChunk
+from cogents_tools.integrations.semantic_search.document_processor import (
+    ChunkingConfig,
+    DocumentProcessor,
+    ProcessedDocument,
+)
+from cogents_tools.integrations.semantic_search.models import DocumentChunk
 
 
 @pytest.fixture

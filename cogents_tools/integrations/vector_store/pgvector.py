@@ -15,7 +15,7 @@ try:
 except ImportError:
     raise ImportError("The 'psycopg2' library is required. Please install it using 'pip install psycopg2'.")
 
-from cogents_core.base.base_vectorstore import BaseVectorStore, OutputData
+from .base import BaseVectorStore, OutputData
 
 logger = logging.getLogger(__name__)
 

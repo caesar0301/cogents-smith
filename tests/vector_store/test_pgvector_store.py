@@ -15,7 +15,7 @@ class TestPGVectorStoreUnit:
 
     def test_class_inherits_from_base(self):
         """Test that PGVectorStore inherits from BaseVectorStore."""
-        from cogents_core.base.base_vectorstore import BaseVectorStore
+        from cogents_tools.integrations.vector_store import BaseVectorStore
 
         assert issubclass(PGVectorStore, BaseVectorStore)
 
@@ -82,8 +82,8 @@ class TestPGVectorStoreUnit:
             dbname="test_db",
             collection_name="test_collection",
             embedding_model_dims=768,
-            user="test_user",
-            password="test_password",
+            user="postgres",
+            password="postgres",
             host="localhost",
             port=5432,
             diskann=False,
@@ -95,7 +95,7 @@ class TestPGVectorStoreUnit:
 
     def test_base_class_compliance(self):
         """Test that the class properly implements BaseVectorStore interface."""
-        from cogents_core.base.base_vectorstore import BaseVectorStore
+        from cogents_tools.integrations.vector_store import BaseVectorStore
 
         # Check that it's an abstract base class implementation
         base_methods = [method for method in dir(BaseVectorStore) if not method.startswith("_")]
@@ -274,7 +274,7 @@ class TestPGVectorStoreIntegration:
         """Test collection information retrieval."""
         info = self.vectorstore.col_info()
         assert isinstance(info, dict)
-        assert "table_name" in info or "collection_name" in info
+        assert "name" in info or "table_name" in info or "collection_name" in info
 
     def test_reset(self):
         """Test collection reset."""

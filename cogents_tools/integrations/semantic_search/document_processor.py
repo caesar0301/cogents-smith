@@ -10,9 +10,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from cogents_core.base.base_search import SearchResult, SourceItem
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pydantic import BaseModel, Field
+
+from cogents_tools.integrations.search import SearchResult, SourceItem
 
 from .models import DocumentChunk, ProcessedDocument
 

@@ -82,7 +82,7 @@ def weaviate_config():
 def pgvector_config():
     """PGVector connection configuration."""
     return {
-        "dbname": os.getenv("PGVECTOR_DB", "test_vectorstore"),
+        "dbname": os.getenv("PGVECTOR_DB", "vectordb"),
         "user": os.getenv("PGVECTOR_USER", "postgres"),
         "password": os.getenv("PGVECTOR_PASSWORD", "postgres"),
         "host": os.getenv("PGVECTOR_HOST", "localhost"),
@@ -281,17 +281,28 @@ def pytest_runtest_teardown(item, nextitem):
 def ensure_toolkits_available():
     """Ensure all toolkits are available for the entire test session."""
     try:
-        pass
+        # Force load all lazy toolkits to register them with cogents_core
+        from cogents_tools import force_load_all_toolkits
 
-        # Force toolkit discovery if needed
+        loaded_toolkits = force_load_all_toolkits()
+        print(f"Force loaded {len(loaded_toolkits)} toolkits: {list(loaded_toolkits.keys())}")
+
+        # Check toolkit registry
         from cogents_core.toolify.registry import ToolkitRegistry
 
-        if len(ToolkitRegistry.list_toolkits()) < 10:  # Should have many toolkits
-            from cogents_core.toolify.registry import _discover_builtin_toolkits
+        registered_toolkits = ToolkitRegistry.list_toolkits()
+        print(f"Session toolkits available: {registered_toolkits}")
 
-            _discover_builtin_toolkits()
+        # If still not enough toolkits, try builtin discovery as fallback
+        if len(registered_toolkits) < 10:  # Should have many toolkits
+            try:
+                from cogents_core.toolify.registry import _discover_builtin_toolkits
 
-        print(f"Session toolkits available: {ToolkitRegistry.list_toolkits()}")
+                _discover_builtin_toolkits()
+                print(f"After builtin discovery: {ToolkitRegistry.list_toolkits()}")
+            except Exception as e:
+                print(f"Warning: Builtin discovery failed: {e}")
+
     except ImportError as e:
         print(f"Warning: Could not import toolkits at session start: {e}")
 

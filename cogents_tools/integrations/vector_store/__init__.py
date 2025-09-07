@@ -1,5 +1,7 @@
 import os
 
+from .base import BaseVectorStore, OutputData
+
 # Optional imports - vector store providers might not be available
 try:
     from .weaviate import WeaviateVectorStore
@@ -18,6 +20,8 @@ except ImportError:
     PGVECTOR_AVAILABLE = False
 
 __all__ = [
+    "BaseVectorStore",
+    "OutputData",
     "WeaviateVectorStore",
     "PGVectorStore",
     "get_vector_store",

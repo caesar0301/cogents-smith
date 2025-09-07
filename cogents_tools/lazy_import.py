@@ -312,6 +312,24 @@ def load_all_toolkits() -> Dict[str, Any]:
     return loaded_toolkits
 
 
+def force_load_all_toolkits() -> Dict[str, Any]:
+    """Force load all registered toolkits by actually accessing their classes."""
+    loaded_toolkits = {}
+
+    for name, registry_entry in _lazy_registry.items():
+        if "toolkit" in registry_entry:
+            try:
+                lazy_toolkit = registry_entry["toolkit"]
+                # Force loading by accessing the toolkit class
+                toolkit_class = lazy_toolkit._load_toolkit()
+                loaded_toolkits[name] = toolkit_class
+                logger.debug(f"Force loaded toolkit: {name} -> {toolkit_class.__name__}")
+            except Exception as e:
+                logger.error(f"Failed to force load toolkit {name}: {e}")
+
+    return loaded_toolkits
+
+
 def get_loaded_modules() -> Set[str]:
     """Get the set of modules that have been loaded."""
     return _loaded_modules.copy()

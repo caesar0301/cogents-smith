@@ -17,9 +17,10 @@ import os
 import tempfile
 from typing import Any, Dict, List
 
+from cogents_tools.integrations.semantic_search import DocumentProcessor, SemanticSearch
+
 # Import vector store functionality
 from cogents_tools.integrations.vector_store import PgVectorStore, WeaviateVectorStore
-from cogents_tools.semantic_search import DocumentProcessor, SemanticSearch
 
 
 def print_section(title: str):

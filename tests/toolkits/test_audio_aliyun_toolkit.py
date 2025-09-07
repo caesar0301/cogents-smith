@@ -154,7 +154,7 @@ class TestAudioAliyunToolkit:
 
         assert result == "direct text result"
 
-    @patch("cogents.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit._transcribe_file_aliyun")
+    @patch("cogents_tools.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit._transcribe_file_aliyun")
     async def test_transcribe_audio_success(self, mock_transcribe, aliyun_toolkit, mock_aliyun_response):
         """Test successful audio transcription API."""
         mock_transcribe.return_value = mock_aliyun_response
@@ -166,7 +166,7 @@ class TestAudioAliyunToolkit:
         assert result["provider"] == "aliyun_nls"
         assert "aliyun_result" in result
 
-    @patch("cogents.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit._transcribe_file_aliyun")
+    @patch("cogents_tools.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit._transcribe_file_aliyun")
     async def test_transcribe_audio_failure(self, mock_transcribe, aliyun_toolkit):
         """Test audio transcription failure."""
         mock_transcribe.side_effect = Exception("Processing failed")
@@ -177,7 +177,7 @@ class TestAudioAliyunToolkit:
         assert "Processing failed" in result["error"]
         assert result["text"] == ""
 
-    @patch("cogents.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit.transcribe_audio")
+    @patch("cogents_tools.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit.transcribe_audio")
     async def test_audio_qa_success(self, mock_transcribe, aliyun_toolkit):
         """Test successful audio Q&A."""
         mock_transcribe.return_value = {"text": "这是一段关于人工智能的讨论。主要讨论了机器学习的应用。", "provider": "aliyun_nls"}
@@ -194,7 +194,7 @@ class TestAudioAliyunToolkit:
             assert "人工智能" in result or "机器学习" in result
             mock_llm_client.completion.assert_called_once()
 
-    @patch("cogents.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit.transcribe_audio")
+    @patch("cogents_tools.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit.transcribe_audio")
     async def test_audio_qa_no_speech(self, mock_transcribe, aliyun_toolkit):
         """Test audio Q&A with no speech detected."""
         mock_transcribe.return_value = {"text": "", "provider": "aliyun_nls"}
@@ -203,7 +203,7 @@ class TestAudioAliyunToolkit:
 
         assert result == "No speech detected in the audio file."
 
-    @patch("cogents.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit.transcribe_audio")
+    @patch("cogents_tools.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit.transcribe_audio")
     async def test_audio_qa_transcription_error(self, mock_transcribe, aliyun_toolkit):
         """Test audio Q&A with transcription error."""
         mock_transcribe.return_value = {"error": "Transcription failed"}
@@ -212,7 +212,7 @@ class TestAudioAliyunToolkit:
 
         assert "Failed to transcribe audio" in result
 
-    @patch("cogents.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit.transcribe_audio")
+    @patch("cogents_tools.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit.transcribe_audio")
     async def test_audio_qa_failure(self, mock_transcribe, aliyun_toolkit):
         """Test audio Q&A failure."""
         mock_transcribe.side_effect = Exception("Processing failed")

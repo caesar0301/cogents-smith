@@ -28,7 +28,7 @@ Before getting started, ensure you have:
 ### 1. Basic Search - Just 3 Lines!
 
 ```python
-from cogents_tools.semantic_search import SemanticSearch
+from cogents_tools.integrations.semantic_search import SemanticSearch
 
 # Create and connect
 search = SemanticSearch()
@@ -83,7 +83,7 @@ docker run -p 8080:8080 semitechnologies/weaviate:latest
 ### Step 2: Your First Search
 
 ```python
-from cogents_tools.semantic_search import SemanticSearch
+from cogents_tools.integrations.semantic_search import SemanticSearch
 
 # Initialize the search system
 search_system = SemanticSearch()
@@ -119,7 +119,7 @@ search_system.close()
 ### Step 3: Building Your Knowledge Base
 
 ```python
-from cogents_tools.semantic_search import SemanticSearch
+from cogents_tools.integrations.semantic_search import SemanticSearch
 
 search_system = SemanticSearch()
 search_system.connect()
@@ -162,7 +162,7 @@ search_system.close()
 ### Multiple Vector Store Backends
 
 ```python
-from cogents_tools.semantic_search import SemanticSearch, SemanticSearchConfig
+from cogents_tools.integrations.semantic_search import SemanticSearch, SemanticSearchConfig
 
 # Option 1: Weaviate (Default)
 weaviate_config = SemanticSearchConfig(
@@ -199,8 +199,8 @@ search_system = SemanticSearch(config=weaviate_config)
 ### Fine-Tuned Document Processing
 
 ```python
-from cogents_tools.semantic_search import SemanticSearch, SemanticSearchConfig
-from cogents_tools.semantic_search.document_processor import ChunkingConfig
+from cogents_tools.integrations.semantic_search import SemanticSearch, SemanticSearchConfig
+from cogents_tools.integrations.semantic_search.document_processor import ChunkingConfig
 
 # Custom chunking strategy
 chunking_config = ChunkingConfig(

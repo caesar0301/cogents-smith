@@ -6,13 +6,15 @@ with proper error handling, logging, configuration management, and integration
 with the existing cogents search infrastructure.
 """
 
+import asyncio
 import logging
 from datetime import datetime
 from typing import List, Optional
 
-from cogents_core.base.base_search import BaseSearch, SearchResult
 from langchain_tavily import TavilySearch
 from pydantic import BaseModel, ConfigDict, Field
+
+from cogents_tools.integrations.search import BaseSearch, SearchResult
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +162,69 @@ class TavilySearchWrapper(BaseSearch):
         except Exception as e:
             logger.error(f"Tavily search failed for query '{query}': {e}")
             raise TavilySearchError(f"Search failed: {e}")
+
+    async def async_search(self, query: str, **kwargs) -> SearchResult:
+        """
+        Perform an async search using Tavily API.
+
+        Args:
+            query: Search query string
+            **kwargs: Additional search parameters
+
+        Returns:
+            SearchResponse object with search results
+
+        Raises:
+            TavilySearchError: If search fails or response is invalid
+        """
+        if not query or not query.strip():
+            raise TavilySearchError("Search query cannot be empty")
+
+        try:
+            start_time = datetime.now()
+            query = query.strip()
+
+            # Perform search in a thread pool to avoid blocking
+            logger.info(f"Performing async search for query: {query}")
+            loop = asyncio.get_event_loop()
+            raw_response = await loop.run_in_executor(None, self._search_tool.invoke, query)
+
+            response_time = (datetime.now() - start_time).total_seconds()
+
+            # Transform raw response to match our SearchResult model
+            transformed_response = {}
+
+            if isinstance(raw_response, dict):
+                # Copy basic fields
+                transformed_response["query"] = raw_response.get("query", query)
+                transformed_response["answer"] = raw_response.get("answer")
+                transformed_response["images"] = raw_response.get("images", [])
+                transformed_response["response_time"] = response_time
+                transformed_response["raw_response"] = raw_response
+                transformed_response["follow_up_questions"] = raw_response.get("follow_up_questions")
+
+                # Transform 'results' to 'sources' if present
+                if "results" in raw_response:
+                    sources = []
+                    for result_item in raw_response["results"]:
+                        source_item = {
+                            "url": result_item.get("url", ""),
+                            "title": result_item.get("title", ""),
+                            "content": result_item.get("content"),
+                            "score": result_item.get("score"),
+                            "raw_content": result_item.get("raw_content"),
+                        }
+                        sources.append(source_item)
+                    transformed_response["sources"] = sources
+                else:
+                    transformed_response["sources"] = []
+
+            result = SearchResult.model_validate(transformed_response)
+            logger.info(f"Async search completed in {response_time:.2f} seconds, {len(result.sources)} results found")
+            return result
+        except Exception as e:
+            logger.error(f"Tavily async search failed for query '{query}': {e}")
+            raise TavilySearchError(f"Async search failed: {e}")
 
     def get_config(self) -> dict:
         """

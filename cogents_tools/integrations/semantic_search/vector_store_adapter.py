@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-from cogents_core.base.base_vectorstore import BaseVectorStore
+from cogents_tools.integrations.vector_store import BaseVectorStore
 
 from .models import DocumentChunk
 

@@ -2,9 +2,8 @@ import uuid
 from unittest.mock import Mock, patch
 
 import pytest
-from cogents_core.base.base_vectorstore import BaseVectorStore
 
-from cogents_tools.integrations.vector_store.weaviate import WeaviateVectorStore
+from cogents_tools.integrations.vector_store.weaviate import BaseVectorStore, WeaviateVectorStore
 
 
 class TestWeaviateVectorStoreUnit:

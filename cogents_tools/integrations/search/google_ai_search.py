@@ -2,14 +2,16 @@
 Google AI Search functionality for web research.
 """
 
+import asyncio
 import logging
 import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from cogents_core.base.base_search import BaseSearch, SearchResult, SourceItem
 from google.genai import Client as GenAIClient
 from google.genai import types
+
+from .base import BaseSearch, SearchResult, SourceItem
 
 logger = logging.getLogger(__name__)
 
@@ -122,8 +124,15 @@ class GoogleAISearch(BaseSearch):
             seen_urls = set()
             for citation in citations:
                 for source in citation.get("grounding_chunks", []):
-                    source_item = SourceItem(**source)
-                    if source_item.url is not None and source_item.url not in seen_urls:
+                    # Create SourceItem with available data from grounding chunks
+                    source_item = SourceItem(
+                        url=source.get("url", ""),
+                        title=source.get("title", ""),
+                        content=None,  # Grounding chunks don't provide content
+                        score=None,  # Grounding chunks don't provide score
+                        raw_content=None,  # Grounding chunks don't provide raw content
+                    )
+                    if source_item.url and source_item.url not in seen_urls:
                         source_info_list.append(source_item)
                         seen_urls.add(source_item.url)
 
@@ -136,6 +145,96 @@ class GoogleAISearch(BaseSearch):
         except Exception as e:
             logger.error(f"Unexpected error in GoogleAISearch: {e}")
             raise RuntimeError(f"GoogleAISearch failed with unexpected error: {str(e)}")
+
+    async def async_search(
+        self,
+        query: str,
+        **kwargs,
+    ) -> SearchResult:
+        """
+        Perform async web search using Google GenAI with Google Search tool.
+
+        Args:
+            query: The search query
+            **kwargs: Additional search parameters
+
+        Returns:
+            SearchResult containing search results with citations and sources
+
+        Raises:
+            GoogleAISearchError: For other Google API errors
+            RuntimeError: For unexpected errors
+        """
+        try:
+            enable_citation = kwargs.get("enable_citation", False)
+
+            # Define the grounding tool for better search results
+            grounding_tool = types.Tool(google_search=types.GoogleSearch())
+
+            formatted_prompt = web_searcher_instructions.format(
+                current_date=datetime.now().strftime("%B %d, %Y"),
+                research_topic=query,
+            )
+
+            # Generate content with Google Search tool in a thread pool
+            logger.info(f"Performing async Google AI search for query: {query}")
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: self.genai_client.models.generate_content(
+                    model=kwargs.get("model", "gemini-2.5-flash"),
+                    contents=formatted_prompt,
+                    config=types.GenerateContentConfig(
+                        tools=[grounding_tool],
+                        temperature=kwargs.get("temperature", 0),
+                    ),
+                ),
+            )
+
+            # Process grounding metadata for citations
+            # reference: https://ai.google.dev/gemini-api/docs/google-search
+            grounding_chunks = response.candidates[0].grounding_metadata.grounding_chunks
+            if not grounding_chunks:
+                logger.warning("No grounding chunks found in the response")
+                return SearchResult(
+                    query=query,
+                    answer=response.text,
+                    sources=[],
+                    raw_response=response,
+                )
+
+            # Extract citations and add them to the generated text
+            citations = self._get_citations(response)
+            logger.info(f"GoogleAISearch async completed for query: {query} with {len(citations)} citations")
+
+            cited_text = self._insert_citation_markers(response.text, citations) if enable_citation else response.text
+
+            # Convert sources to SourceInfo objects, ensuring unique URLs
+            source_info_list = []
+            seen_urls = set()
+            for citation in citations:
+                for source in citation.get("grounding_chunks", []):
+                    # Create SourceItem with available data from grounding chunks
+                    source_item = SourceItem(
+                        url=source.get("url", ""),
+                        title=source.get("title", ""),
+                        content=None,  # Grounding chunks don't provide content
+                        score=None,  # Grounding chunks don't provide score
+                        raw_content=None,  # Grounding chunks don't provide raw content
+                    )
+                    if source_item.url and source_item.url not in seen_urls:
+                        source_info_list.append(source_item)
+                        seen_urls.add(source_item.url)
+
+            return SearchResult(
+                query=query,
+                answer=cited_text,
+                sources=source_info_list,
+                raw_response=response,
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error in GoogleAISearch async: {e}")
+            raise RuntimeError(f"GoogleAISearch async failed with unexpected error: {str(e)}")
 
     def _insert_citation_markers(self, text: str, citations_list: List[Dict[str, Any]]) -> str:
         """

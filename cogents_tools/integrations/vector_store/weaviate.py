@@ -17,10 +17,11 @@ except ImportError:
     )
 
 import weaviate.classes.config as wvcc
-from cogents_core.base.base_vectorstore import BaseVectorStore, OutputData
 from weaviate.classes.init import Auth
 from weaviate.classes.query import Filter, MetadataQuery
 from weaviate.util import get_valid_uuid
+
+from .base import BaseVectorStore, OutputData
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class WeaviateVectorStore(BaseVectorStore):
     def __init__(
         self,
         collection_name: str,
-        embedding_model_dims: int,
+        embedding_model_dims: int = 768,
         cluster_url: str = None,
         auth_client_secret: str = None,
         additional_headers: dict = None,
@@ -39,7 +40,7 @@ class WeaviateVectorStore(BaseVectorStore):
 
         Args:
             collection_name (str): Name of the collection/class in Weaviate.
-            embedding_model_dims (int): Dimensions of the embedding model.
+            embedding_model_dims (int, optional): Dimensions of the embedding model.
             client (WeaviateClient, optional): Existing Weaviate client instance. Defaults to None.
             cluster_url (str, optional): URL for Weaviate server. Defaults to None.
             auth_config (dict, optional): Authentication configuration for Weaviate. Defaults to None.
@@ -50,7 +51,7 @@ class WeaviateVectorStore(BaseVectorStore):
         if "localhost" in cluster_url:
             self.client = weaviate.connect_to_local(headers=additional_headers)
         else:
-            self.client = weaviate.connect_to_wcs(
+            self.client = weaviate.connect_to_weaviate_cloud(
                 cluster_url=cluster_url,
                 auth_credentials=Auth.api_key(auth_client_secret),
                 headers=additional_headers,
@@ -116,11 +117,14 @@ class WeaviateVectorStore(BaseVectorStore):
             ),
             wvcc.Property(name="data", data_type=wvcc.DataType.TEXT),
             wvcc.Property(name="created_at", data_type=wvcc.DataType.TEXT),
-            wvcc.Property(name="category", data_type=wvcc.DataType.TEXT),
+            wvcc.Property(
+                name="category",
+                data_type=wvcc.DataType.TEXT,
+                index_filterable=True,
+                index_searchable=False,  # Disable text search for exact matching
+                tokenization=wvcc.Tokenization.FIELD,  # Use field tokenization for exact matching
+            ),
             wvcc.Property(name="updated_at", data_type=wvcc.DataType.TEXT),
-            wvcc.Property(name="user_id", data_type=wvcc.DataType.TEXT),
-            wvcc.Property(name="agent_id", data_type=wvcc.DataType.TEXT),
-            wvcc.Property(name="run_id", data_type=wvcc.DataType.TEXT),
         ]
 
         vector_config = wvcc.Configure.Vectors.self_provided()
@@ -177,6 +181,9 @@ class WeaviateVectorStore(BaseVectorStore):
         """
         Search for similar vectors.
         """
+        logger.info(f"Searching in collection {self.weaviate_collection_name} with query: {query}")
+        logger.info(f"Vector dimensions: {len(vectors)}, limit: {limit}")
+
         collection = self.client.collections.get(str(self.weaviate_collection_name))
         filter_conditions = []
         if filters:
@@ -184,22 +191,29 @@ class WeaviateVectorStore(BaseVectorStore):
                 if value:
                     filter_conditions.append(Filter.by_property(key).equal(value))
         combined_filter = Filter.all_of(filter_conditions) if filter_conditions else None
-        response = collection.query.near_vector(
-            near_vector=vectors,
-            limit=limit,
-            filters=combined_filter,
-            distance=1.0,  # Use a permissive distance threshold
-            # Return all properties to support custom fields
-            return_metadata=MetadataQuery(score=True),
-        )
+
+        try:
+            # Try vector similarity search first
+            response = collection.query.near_vector(
+                near_vector=vectors,
+                limit=limit,
+                filters=combined_filter,
+                distance=0.99,  # Use a very permissive distance threshold
+                # Return all properties to support custom fields
+                return_metadata=MetadataQuery(score=True),
+            )
+
+            # If no results from vector search, fall back to filtered object retrieval
+            if len(response.objects) == 0:
+                response = collection.query.fetch_objects(limit=limit, filters=combined_filter)
+
+        except Exception as e:
+            logger.error(f"Search failed with error: {e}")
+            raise
+
         results = []
         for obj in response.objects:
             payload = obj.properties.copy()
-
-            for id_field in ["run_id", "agent_id", "user_id"]:
-                if id_field in payload and payload[id_field] is None:
-                    del payload[id_field]
-
             payload["id"] = str(obj.uuid).split("'")[0]  # Include the id in the payload
             results.append(
                 OutputData(
@@ -336,19 +350,25 @@ class WeaviateVectorStore(BaseVectorStore):
                 if value:
                     filter_conditions.append(Filter.by_property(key).equal(value))
         combined_filter = Filter.all_of(filter_conditions) if filter_conditions else None
-        # Use fetch_objects with filters when filters are applied
-        if combined_filter:
-            response = collection.query.fetch_objects(
-                limit=limit,
-                filters=combined_filter,
-                # Return all properties to support custom fields
-            )
-        else:
-            # No filters, just fetch all objects
-            response = collection.query.fetch_objects(
-                limit=limit,
-                # Return all properties to support custom fields
-            )
+
+        try:
+            # Use fetch_objects with filters when filters are applied
+            if combined_filter:
+                response = collection.query.fetch_objects(
+                    limit=limit,
+                    filters=combined_filter,
+                    # Return all properties to support custom fields
+                )
+            else:
+                # No filters, just fetch all objects
+                response = collection.query.fetch_objects(
+                    limit=limit,
+                    # Return all properties to support custom fields
+                )
+        except Exception as e:
+            logger.error(f"List failed with error: {e}")
+            raise
+
         results = []
         for obj in response.objects:
             payload = obj.properties.copy()

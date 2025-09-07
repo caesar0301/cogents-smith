@@ -25,7 +25,7 @@ sys.path.insert(0, str(project_root))
 
 from cogents_tools.integrations.semantic_search import SemanticSearch, SemanticSearchConfig
 from cogents_tools.integrations.semantic_search.document_processor import ChunkingConfig
-from cogents_tools.integrations.web_search import TavilySearchConfig, TavilySearchWrapper
+from cogents_tools.integrations.search import TavilySearchConfig, TavilySearchWrapper
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

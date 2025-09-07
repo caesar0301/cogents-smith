@@ -17,6 +17,7 @@ from . import groups
 from .lazy_import import (
     disable_lazy_loading,
     enable_lazy_loading,
+    force_load_all_toolkits,
     get_available_groups,
     get_group_toolkits,
     get_loaded_modules,
@@ -35,6 +36,7 @@ __all__ = [
     "is_lazy_loading_enabled",
     "load_toolkit_group",
     "load_all_toolkits",
+    "force_load_all_toolkits",
     "get_available_groups",
     "get_group_toolkits",
     "get_loaded_modules",
