@@ -1,8 +1,9 @@
 # Cogents-Tools
 
-[![CI](https://github.com/caesar0301/cogents-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/caesar0301/cogents-tools/actions/workflows/ci.yml)
+[![CI](https://github.com/mirasurf/cogents-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/mirasurf/cogents-tools/actions/workflows/ci.yml)
+
 [![PyPI version](https://img.shields.io/pypi/v/cogents-tools.svg)](https://pypi.org/project/cogents-tools/)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/caesar0301/cogents-tools)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/mirasurf/cogents-tools)
 
 A comprehensive collection of essential building blocks for constructing cognitive multi-agent systems (MAS). Rather than building a full agent framework, Cogents provides a lightweight repository of key components designed to bridge the final mile in MAS development. Our philosophy focuses on modular, composable components that can be easily integrated into existing systems or used to build new ones from the ground up.
 
