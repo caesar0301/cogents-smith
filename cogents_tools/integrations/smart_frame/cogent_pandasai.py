@@ -8,10 +8,10 @@ import logging
 from typing import Any, Dict, Optional
 
 import pandas as pd
-from cogent_base.config import get_cogent_config
 from pandasai import Agent
 
 from .base_pandasai import BasePandasAI, PandasAIFactory
+from .config import get_cogent_config
 
 logger = logging.getLogger(__name__)
 

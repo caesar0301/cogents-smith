@@ -12,11 +12,12 @@ from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
 
 from cogents_tools.integrations.search import BaseSearch, SearchResult, TavilySearchWrapper
+from cogents_tools.integrations.utils.embedgen import EmbeddingGenerator
 from cogents_tools.integrations.vector_store import BaseVectorStore, get_vector_store
 
-from .document_processor import ChunkingConfig, DocumentProcessor
+from .docproc import ChunkingConfig, DocumentProcessor
 from .models import DocumentChunk
-from .vector_store_adapter import EmbeddingGenerator, VectorStoreAdapter
+from .vector_store_adapter import VectorStoreAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +154,7 @@ class SemanticSearch:
             self.vector_store = vector_store
 
         # Initialize embedding generator and adapter
-        self.embedding_generator = EmbeddingGenerator(self.config.embedding_model)
+        self.embedding_generator = EmbeddingGenerator(model=self.config.embedding_model)
         self.vector_store_adapter = VectorStoreAdapter(self.vector_store, self.embedding_generator)
 
         self.document_processor = DocumentProcessor(self.config.chunking_config)

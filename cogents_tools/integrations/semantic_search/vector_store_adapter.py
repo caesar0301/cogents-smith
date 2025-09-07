@@ -11,6 +11,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
+from cogents_tools.integrations.utils.embedgen import EmbeddingGenerator
 from cogents_tools.integrations.vector_store import BaseVectorStore
 
 from .models import DocumentChunk
@@ -19,64 +20,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "VectorStoreAdapter",
-    "EmbeddingGenerator",
 ]
-
-
-class EmbeddingGenerator:
-    """
-    Handles embedding generation for text content.
-
-    This is a simple implementation that would need to be enhanced with
-    actual embedding models (like Ollama, OpenAI, etc.)
-    """
-
-    def __init__(self, embedding_model: str = "nomic-embed-text:latest"):
-        """
-        Initialize embedding generator.
-
-        Args:
-            embedding_model: Name of the embedding model to use
-        """
-        self.embedding_model = embedding_model
-        self._embedding_dims = None
-
-    def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """
-        Generate embeddings for a list of texts.
-
-        Args:
-            texts: List of text strings to embed
-
-        Returns:
-            List[List[float]]: List of embedding vectors
-
-        Note:
-            This is a placeholder implementation. In practice, this would
-            use actual embedding models like Ollama, OpenAI, etc.
-        """
-        # TODO: Implement actual embedding generation
-        # For now, return dummy embeddings with correct dimensions
-        if self._embedding_dims is None:
-            self._embedding_dims = 768  # Default embedding dimension
-
-        return [[0.1] * self._embedding_dims for _ in texts]
-
-    def generate_embedding(self, text: str) -> List[float]:
-        """
-        Generate embedding for a single text.
-
-        Args:
-            text: Text string to embed
-
-        Returns:
-            List[float]: Embedding vector
-        """
-        return self.generate_embeddings([text])[0]
-
-    def set_embedding_dimensions(self, dims: int) -> None:
-        """Set the expected embedding dimensions."""
-        self._embedding_dims = dims
 
 
 class VectorStoreAdapter:
@@ -94,9 +38,6 @@ class VectorStoreAdapter:
         """
         self.vector_store = vector_store
         self.embedding_generator = embedding_generator or EmbeddingGenerator()
-
-        # Set embedding dimensions
-        self.embedding_generator.set_embedding_dimensions(vector_store.embedding_model_dims)
 
     def store_chunks(self, chunks: List[DocumentChunk]) -> List[str]:
         """

@@ -6,7 +6,7 @@ This example demonstrates how to parse documents using CogentParser.
 
 import asyncio
 
-from cogent_base.sensory.parser import CogentParser
+from .sensory.parser import CogentParser
 
 
 async def main():

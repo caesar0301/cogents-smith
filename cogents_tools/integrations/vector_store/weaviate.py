@@ -261,6 +261,13 @@ class WeaviateVectorStore(BaseVectorStore):
                 existing_payload: Mapping[str, str] = existing_data
                 collection.data.update(uuid=vector_id, properties=existing_payload, vector=vector)
 
+    def close(self) -> None:
+        """
+        Close the Weaviate client connection.
+        """
+        if hasattr(self, "client") and self.client:
+            self.client.close()
+
     def get(self, vector_id: str) -> Optional[OutputData]:
         """
         Retrieve a vector by ID.

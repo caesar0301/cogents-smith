@@ -34,13 +34,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # ollama:
-  #   image: registry.cn-hangzhou.aliyuncs.com/lacogito/ollama:0.9.1
-  #   restart: unless-stopped
-  #   ports:
-  #     - "11434:11434"  # HTTP API
-  #   volumes:
-  #     - $HOME/.ollama/models:/root/.ollama/models
+  ollama:
+    image: registry.cn-hangzhou.aliyuncs.com/lacogito/ollama:0.9.1
+    restart: unless-stopped
+    ports:
+      - "11434:11434"  # HTTP API
+    volumes:
+      - $HOME/.ollama/models:/root/.ollama/models
 
 volumes:
   weaviate_data:

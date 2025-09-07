@@ -11,12 +11,12 @@ from typing import Any, Dict, Optional
 import openai
 import pandas as pd
 import pandasai as pai
-from cogent_base.config import get_cogent_config
-from cogent_base.config.consts import DEFAULT_DASHSCOPE_API_BASE
 from pandasai import Agent
 from pandasai_openai import OpenAI
 
 from .base_pandasai import BasePandasAI
+from .config import get_cogent_config
+from .config.consts import DEFAULT_DASHSCOPE_API_BASE
 
 logger = logging.getLogger(__name__)
 

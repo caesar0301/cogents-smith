@@ -6,7 +6,7 @@ This example demonstrates how to split text into chunks using StandardChunker.
 
 import asyncio
 
-from cogent_base.sensory.chunker import StandardChunker
+from .sensory.chunker import StandardChunker
 
 
 async def main():

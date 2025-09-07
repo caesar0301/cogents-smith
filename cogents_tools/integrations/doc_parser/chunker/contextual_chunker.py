@@ -7,11 +7,10 @@ Original code from https://github.com/morphik/morphik-core
 import logging
 from typing import List
 
-from cogent_base.completion.litellm_completion import LiteLLMCompletionModel
-from cogent_base.config import get_cogent_config
-
 from ..models import Chunk, CompletionRequest
 from .base_chunker import BaseChunker
+from .completion.litellm_completion import LiteLLMCompletionModel
+from .config import get_cogent_config
 from .standard_chunker import StandardChunker
 
 logger = logging.getLogger(__name__)
