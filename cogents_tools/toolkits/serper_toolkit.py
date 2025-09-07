@@ -10,7 +10,7 @@ import os
 from typing import Any, Callable, Dict, Optional
 
 import aiohttp
-from cogents_core.logging_config import get_logger
+from cogents_core.utils.logging import get_logger
 from cogents_core.toolify.base import AsyncBaseToolkit
 from cogents_core.toolify.config import ToolkitConfig
 from cogents_core.toolify.registry import register_toolkit

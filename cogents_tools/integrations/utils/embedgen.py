@@ -2,7 +2,7 @@ import asyncio
 from typing import List, Optional
 
 from cogents_core.llm import get_llm_client
-from cogents_core.logging_config import get_logger
+from cogents_core.utils.logging import get_logger
 
 logger = get_logger(__name__)
 

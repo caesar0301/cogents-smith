@@ -8,7 +8,7 @@ with comprehensive error handling and security features.
 import re
 from typing import Callable, Dict, Optional
 
-from cogents_core.logging_config import get_logger
+from cogents_core.utils.logging import get_logger
 from cogents_core.toolify.base import AsyncBaseToolkit
 from cogents_core.toolify.config import ToolkitConfig
 from cogents_core.toolify.registry import register_toolkit
