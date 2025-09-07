@@ -13,15 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
-from cogents_tools.integrations.search import BaseSearch, SearchResult
-
-# Conditional import for TavilySearchWrapper
-try:
-    from cogents_tools.integrations.search import TavilySearchWrapper
-
-    _TAVILY_AVAILABLE = True
-except ImportError:
-    _TAVILY_AVAILABLE = False
+from cogents_tools.integrations.search import BaseSearch, SearchResult, TavilySearchWrapper
 from cogents_tools.integrations.utils.embedgen import EmbeddingGenerator
 from cogents_tools.integrations.vector_store import BaseVectorStore, get_vector_store
 
@@ -104,7 +96,8 @@ class SemanticSearch:
     This class coordinates between local vector search and web search
     to provide comprehensive semantic search capabilities. It handles the entire
     workflow from query to results, including document processing and storage.
-    Supports multiple vector store backends (Weaviate, PGVector).
+    Supports multiple vector store backends (Weaviate, PGVector) and uses
+    the BaseSearch interface for web search providers (defaults to Tavily).
 
     ```
     ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
@@ -115,13 +108,13 @@ class SemanticSearch:
                         ▼           ▼           ▼
                 ┌─────────────┐ ┌─────────┐ ┌──────────────┐
                 │ Vector Store│ │ Web     │ │ Document     │
-                │ Adapter     │ │ Search  │ │ Processor    │
+                │ (Integrated)│ │ Search  │ │ Processor    │
                 └─────────────┘ └─────────┘ └──────────────┘
                         │           │           │
                         ▼           ▼           ▼
                 ┌─────────────┐ ┌─────────┐ ┌──────────────┐
                 │ Vector DB   │ │ Tavily  │ │ LangChain    │
-                │(Weaviate/PG)│ │ API     │ │ Splitters    │
+                │(Weaviate/PG)│ │(Default)│ │ Splitters    │
                 └─────────────┘ └─────────┘ └──────────────┘
                         │                           │
                         ▼                           ▼
@@ -142,7 +135,8 @@ class SemanticSearch:
         Initialize semantic search.
 
         Args:
-            web_search_engine: Web search engine instance (defaults to TavilySearchWrapper)
+            web_search_engine: Web search engine instance implementing BaseSearch interface
+                              (defaults to TavilySearchWrapper)
             config: Configuration for semantic search
             vector_store: Vector store instance (optional, will be created based on config)
         """
@@ -150,11 +144,8 @@ class SemanticSearch:
 
         # Initialize components
         if web_search_engine is None:
-            if _TAVILY_AVAILABLE:
-                self.web_search = TavilySearchWrapper()
-            else:
-                logger.warning("TavilySearchWrapper not available. Web search functionality will be disabled.")
-                self.web_search = None
+            # Use Tavily as default web search provider
+            self.web_search = TavilySearchWrapper()
         else:
             self.web_search = web_search_engine
 
@@ -243,9 +234,7 @@ class SemanticSearch:
             web_results_count = 0
 
             # Step 2: Determine if web search is needed
-            if (
-                force_web_search or len(local_chunks) < self.config.fallback_threshold or not local_chunks
-            ) and self.web_search:
+            if force_web_search or len(local_chunks) < self.config.fallback_threshold or not local_chunks:
                 # Perform web search
                 web_response = self.web_search.search(query)
 
@@ -462,7 +451,7 @@ class SemanticSearch:
         try:
             vector_store_stats = self._get_collection_stats()
             processor_stats = self.document_processor.get_stats()
-            web_search_config = self.web_search.get_config() if self.web_search else {"available": False}
+            web_search_config = self.web_search.get_config()
 
             return {
                 "connected": self._connected,

@@ -23,18 +23,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from cogents_tools.integrations.search import TavilySearchConfig, TavilySearchWrapper
 from cogents_tools.integrations.semantic_search import SemanticSearch, SemanticSearchConfig
 from cogents_tools.integrations.semantic_search.docproc import ChunkingConfig
-
-# Conditional import for TavilySearchWrapper
-try:
-    from cogents_tools.integrations.search import TavilySearchConfig, TavilySearchWrapper
-
-    _TAVILY_AVAILABLE = True
-except ImportError:
-    _TAVILY_AVAILABLE = False
-    TavilySearchConfig = None
-    TavilySearchWrapper = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -77,17 +68,13 @@ def create_search_system() -> SemanticSearch:
     )
 
     # Web search configuration
-    if _TAVILY_AVAILABLE:
-        tavily_config = TavilySearchConfig(
-            max_results=5,
-            search_depth="advanced",
-            include_raw_content=True,
-        )
-        web_search = TavilySearchWrapper(config=tavily_config)
-        return SemanticSearch(web_search_engine=web_search, config=search_config)
-    else:
-        # Fallback without web search
-        return SemanticSearch(config=search_config)
+    tavily_config = TavilySearchConfig(
+        max_results=5,
+        search_depth="advanced",
+        include_raw_content=True,
+    )
+    web_search = TavilySearchWrapper(config=tavily_config)
+    return SemanticSearch(web_search_engine=web_search, config=search_config)
 
 
 def main():
@@ -104,16 +91,12 @@ def main():
 
     # Check prerequisites
     print("\n🔧 Checking Prerequisites:")
-    if _TAVILY_AVAILABLE:
-        tavily_key = os.getenv("TAVILY_API_KEY")
-        if tavily_key:
-            print(f"   ✅ TAVILY_API_KEY: Set ({tavily_key[:8]}...)")
-        else:
-            print("   ⚠️  TAVILY_API_KEY: Not set - web search will not work")
-            print("   💡 Get your free key at: https://tavily.com")
+    tavily_key = os.getenv("TAVILY_API_KEY")
+    if tavily_key:
+        print(f"   ✅ TAVILY_API_KEY: Set ({tavily_key[:8]}...)")
     else:
-        print("   ⚠️  TavilySearchWrapper: Not available - web search disabled")
-        print("   💡 Install langchain-tavily to enable web search functionality")
+        print("   ⚠️  TAVILY_API_KEY: Not set - web search will not work")
+        print("   💡 Get your free key at: https://tavily.com")
 
     weaviate_url = os.getenv("WEAVIATE_URL", "http://localhost:8080")
     print(f"   🔗 Weaviate URL: {weaviate_url}")
@@ -131,18 +114,13 @@ def main():
         if not search_system.connect():
             print("❌ Failed to connect to Weaviate. Troubleshooting tips:")
             print(f"   • Ensure Weaviate is running at {weaviate_url}")
-            print("   • Start services with: docker compose up -d weaviate ollama")
-            print("   • Check network connectivity and firewall settings")
             return
 
         print("✅ Connected to Weaviate successfully!")
-        print("✅ Embedding service ready!")
-        if _TAVILY_AVAILABLE and os.getenv("TAVILY_API_KEY"):
+        if os.getenv("TAVILY_API_KEY"):
             print("✅ Web search service ready!")
-        elif _TAVILY_AVAILABLE:
-            print("⚠️  Web search service not configured (missing TAVILY_API_KEY)")
         else:
-            print("⚠️  Web search service not available (TavilySearchWrapper not installed)")
+            print("⚠️  Web search service not configured (missing TAVILY_API_KEY)")
 
         # 1. First search - should trigger web search (empty local storage)
         print_section("1. FIRST SEARCH - Web Search Triggered")
@@ -264,12 +242,6 @@ def main():
         print(f"📊 Total Chunks: {stats.get('weaviate', {}).get('total_chunks', 0)}")
         print(f"📊 Collection: {stats.get('weaviate', {}).get('collection_name', 'Unknown')}")
 
-        print(f"\n🎯 Demo Summary:")
-        print(f"   • Demonstrated integrated web + vector search")
-        print(f"   • Showed automatic fallback from local to web search")
-        print(f"   • Auto-stored web results for future searches")
-        print(f"   • Combined local and web results in hybrid search")
-
     except Exception as e:
         logger.error(f"❌ Error during execution: {e}")
         print(f"❌ Demo failed: {e}")
@@ -285,12 +257,6 @@ def main():
         print("✅ Semantic search system closed")
 
     print_section("Demo Complete")
-    print("🎉 Integrated semantic search demo completed!")
-    print("\n📚 Key Takeaways:")
-    print("   • The system automatically combines local and web search")
-    print("   • Web results are auto-stored for future local searches")
-    print("   • Fallback threshold controls when web search is triggered")
-    print("   • Hybrid results provide comprehensive search coverage")
 
 
 if __name__ == "__main__":
