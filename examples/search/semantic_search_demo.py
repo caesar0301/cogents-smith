@@ -1,17 +1,17 @@
+#!/usr/bin/env python3
 """
-Simplified Semantic Search Example for cogents.
+Semantic Search Demo - Core Integrated Functionality
 
-This example demonstrates the core features of the semantic search system:
-- Basic search with web fallback
-- Manual document storage
-- Filtered search
-- Caching
-- System statistics
+This demo showcases the main design goal of the semantic search module:
+- Integrated web search + vector search
+- Automatic fallback from local to web search
+- Auto-storage of web results for future searches
+- Hybrid search results combining both sources
 
 Prerequisites:
 - Weaviate running on localhost:8080
 - Ollama running on localhost:11434 with nomic-embed-text model
-- TAVILY_API_KEY environment variable set
+- TAVILY_API_KEY environment variable set (for web search)
 """
 
 import logging
@@ -23,17 +23,33 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from cogents_tools.integrations.search import TavilySearchConfig, TavilySearchWrapper
 from cogents_tools.integrations.semantic_search import SemanticSearch, SemanticSearchConfig
-from cogents_tools.integrations.semantic_search.document_processor import ChunkingConfig
+from cogents_tools.integrations.semantic_search.docproc import ChunkingConfig
+
+# Conditional import for TavilySearchWrapper
+try:
+    from cogents_tools.integrations.search import TavilySearchConfig, TavilySearchWrapper
+
+    _TAVILY_AVAILABLE = True
+except ImportError:
+    _TAVILY_AVAILABLE = False
+    TavilySearchConfig = None
+    TavilySearchWrapper = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def print_section(title: str):
+    """Print a formatted section header."""
+    print(f"\n{'='*60}")
+    print(f" {title}")
+    print(f"{'='*60}")
+
+
 def create_search_system() -> SemanticSearch:
-    """Create and configure the semantic search system."""
+    """Create and configure the semantic search system with web search integration."""
 
     # Basic configuration
     chunking_config = ChunkingConfig(
@@ -42,9 +58,9 @@ def create_search_system() -> SemanticSearch:
     )
 
     search_config = SemanticSearchConfig(
-        # Vector store configuration (Weaviate as default)
+        # Vector store configuration
         vector_store_provider="weaviate",
-        collection_name="CogentNanoDocuments",
+        collection_name="cogents_demo_documents",
         embedding_model="nomic-embed-text:latest",
         embedding_model_dims=768,
         vector_store_config={
@@ -54,36 +70,50 @@ def create_search_system() -> SemanticSearch:
         },
         # Document processing configuration
         chunking_config=chunking_config,
-        local_search_limit=5,
-        fallback_threshold=2,
+        local_search_limit=3,  # Small limit to trigger web search
+        fallback_threshold=2,  # Trigger web search if < 2 local results
         enable_caching=True,
-        auto_store_web_results=True,
+        auto_store_web_results=True,  # Enable auto-storage of web results
     )
 
     # Web search configuration
-    tavily_config = TavilySearchConfig(
-        max_results=5,
-        search_depth="advanced",
-        include_raw_content=True,
-    )
-
-    web_search = TavilySearchWrapper(config=tavily_config)
-    return SemanticSearch(web_search_engine=web_search, config=search_config)
+    if _TAVILY_AVAILABLE:
+        tavily_config = TavilySearchConfig(
+            max_results=5,
+            search_depth="advanced",
+            include_raw_content=True,
+        )
+        web_search = TavilySearchWrapper(config=tavily_config)
+        return SemanticSearch(web_search_engine=web_search, config=search_config)
+    else:
+        # Fallback without web search
+        return SemanticSearch(config=search_config)
 
 
 def main():
-    """Main example demonstrating semantic search features."""
+    """Main demo showcasing integrated web + vector search functionality."""
 
-    print("🚀 Semantic Search Demo Starting...")
-    print("=" * 70)
+    print_section("Semantic Search - Integrated Web + Vector Search Demo")
+
+    print("🚀 Welcome to the integrated semantic search demonstration!")
+    print("\n📋 This demo showcases the core design goal:")
+    print("   • Integrated web search + vector search")
+    print("   • Automatic fallback from local to web search")
+    print("   • Auto-storage of web results for future searches")
+    print("   • Hybrid search results combining both sources")
 
     # Check prerequisites
-    print("🔧 Checking Prerequisites:")
-    tavily_key = os.getenv("TAVILY_API_KEY")
-    if tavily_key:
-        print(f"   ✅ TAVILY_API_KEY: Set ({tavily_key[:8]}...)")
+    print("\n🔧 Checking Prerequisites:")
+    if _TAVILY_AVAILABLE:
+        tavily_key = os.getenv("TAVILY_API_KEY")
+        if tavily_key:
+            print(f"   ✅ TAVILY_API_KEY: Set ({tavily_key[:8]}...)")
+        else:
+            print("   ⚠️  TAVILY_API_KEY: Not set - web search will not work")
+            print("   💡 Get your free key at: https://tavily.com")
     else:
-        print("   ⚠️  TAVILY_API_KEY: Not set - web search will not work")
+        print("   ⚠️  TavilySearchWrapper: Not available - web search disabled")
+        print("   💡 Install langchain-tavily to enable web search functionality")
 
     weaviate_url = os.getenv("WEAVIATE_URL", "http://localhost:8080")
     print(f"   🔗 Weaviate URL: {weaviate_url}")
@@ -91,7 +121,7 @@ def main():
     ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     print(f"   🤖 Ollama URL: {ollama_url}")
 
-    print("\n🚀 Initializing Semantic Search System...")
+    print("\n🚀 Initializing Integrated Semantic Search System...")
 
     # Create and connect
     search_system = create_search_system()
@@ -101,35 +131,68 @@ def main():
         if not search_system.connect():
             print("❌ Failed to connect to Weaviate. Troubleshooting tips:")
             print(f"   • Ensure Weaviate is running at {weaviate_url}")
-            print(
-                "   • For local setup: docker run -p 8080:8080 -e AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true semitechnologies/weaviate:latest"
-            )
+            print("   • Start services with: docker compose up -d weaviate ollama")
             print("   • Check network connectivity and firewall settings")
             return
 
         print("✅ Connected to Weaviate successfully!")
         print("✅ Embedding service ready!")
+        if _TAVILY_AVAILABLE and os.getenv("TAVILY_API_KEY"):
+            print("✅ Web search service ready!")
+        elif _TAVILY_AVAILABLE:
+            print("⚠️  Web search service not configured (missing TAVILY_API_KEY)")
+        else:
+            print("⚠️  Web search service not available (TavilySearchWrapper not installed)")
 
-        # 1. Basic search (with web fallback)
-        print("\n" + "=" * 60)
-        print("1. BASIC SEARCH (with web fallback)")
-        print("=" * 60)
+        # 1. First search - should trigger web search (empty local storage)
+        print_section("1. FIRST SEARCH - Web Search Triggered")
 
-        query = "best travel destinations in Japan"
-        print(f"🔍 Searching for: '{query}'")
+        query1 = "latest developments in artificial intelligence 2024"
+        print(f"🔍 Searching for: '{query1}'")
+        print("💡 This should trigger web search since local storage is empty...")
 
-        result = search_system.search(query)
-        print(f"📊 Search Results:")
-        print(f"   • Total results: {result.total_results}")
-        print(f"   • Local results: {result.local_results}")
-        print(f"   • Web results: {result.web_results}")
-        print(f"   • Search time: {result.search_time:.2f}s")
-        print(f"   • Cached: {result.cached}")
+        result1 = search_system.search(query1)
+        print(f"\n📊 Search Results:")
+        print(f"   • Total results: {result1.total_results}")
+        print(f"   • Local results: {result1.local_results}")
+        print(f"   • Web results: {result1.web_results}")
+        print(f"   • Search time: {result1.search_time:.2f}s")
+        print(f"   • Cached: {result1.cached}")
 
-        if result.chunks:
-            print(f"📝 Top results:")
-            for i, (chunk, score) in enumerate(result.chunks[:3], 1):
-                print(f"   {i}. [{chunk.source}] Score: {score:.3f}")
+        if result1.chunks:
+            print(f"\n📝 Top results:")
+            for i, (chunk, score) in enumerate(result1.chunks[:3], 1):
+                source = chunk.source_title or "Unknown Source"
+                print(f"   {i}. [{source}] Score: {score:.3f}")
+                content_preview = (
+                    chunk.content[:100].replace("\n", " ") + "..." if len(chunk.content) > 100 else chunk.content
+                )
+                print(f"      {content_preview}")
+                if chunk.source_url and chunk.source_url.startswith("http"):
+                    print(f"      🔗 {chunk.source_url}")
+        else:
+            print("   No results found")
+
+        # 2. Second search - should use cached/stored results
+        print_section("2. SECOND SEARCH - Local + Cached Results")
+
+        query2 = "AI machine learning trends"
+        print(f"🔍 Searching for: '{query2}'")
+        print("💡 This should find results from the previous search that were auto-stored...")
+
+        result2 = search_system.search(query2)
+        print(f"\n📊 Search Results:")
+        print(f"   • Total results: {result2.total_results}")
+        print(f"   • Local results: {result2.local_results}")
+        print(f"   • Web results: {result2.web_results}")
+        print(f"   • Search time: {result2.search_time:.2f}s")
+        print(f"   • Cached: {result2.cached}")
+
+        if result2.chunks:
+            print(f"\n📝 Top results:")
+            for i, (chunk, score) in enumerate(result2.chunks[:3], 1):
+                source = chunk.source_title or "Unknown Source"
+                print(f"   {i}. [{source}] Score: {score:.3f}")
                 content_preview = (
                     chunk.content[:100].replace("\n", " ") + "..." if len(chunk.content) > 100 else chunk.content
                 )
@@ -137,64 +200,63 @@ def main():
         else:
             print("   No results found")
 
-        # 2. Manual document storage
-        print("\n" + "=" * 60)
-        print("2. MANUAL DOCUMENT STORAGE")
-        print("=" * 60)
+        # 3. Store a local document
+        print_section("3. STORE LOCAL DOCUMENT")
 
-        sample_doc = """
-        Artificial Intelligence in Healthcare
+        local_doc = """
+        Python Programming for Data Science
         
-        AI is revolutionizing healthcare through:
-        - Medical imaging analysis for cancer detection
-        - Drug discovery acceleration
-        - Personalized medicine based on genetic profiles
-        - Predictive analytics for patient outcomes
+        Python has become the dominant language for data science due to its:
+        - Simple and readable syntax
+        - Rich ecosystem of libraries (NumPy, Pandas, Scikit-learn)
+        - Strong community support
+        - Integration with big data tools
         
-        These technologies improve accuracy, reduce costs, and make healthcare more accessible.
+        Popular libraries include NumPy for numerical computing, Pandas for data manipulation, 
+        and Matplotlib for visualization. These tools make Python ideal for machine learning, 
+        statistical analysis, and data visualization tasks.
         """
 
+        print("📝 Storing local document: 'Python Data Science Guide'")
         chunks_stored = search_system.store_document(
-            content=sample_doc,
-            source_url="example://ai-healthcare",
-            source_title="AI in Healthcare Guide",
-            metadata={"category": "healthcare", "type": "guide"},
+            content=local_doc,
+            source_url="local://python-data-science",
+            source_title="Python Data Science Guide",
+            metadata={"category": "programming", "type": "guide"},
         )
-        print(f"✅ Stored document with {chunks_stored} chunks")
+        print(f"✅ Stored {chunks_stored} chunks locally")
 
-        # 3. Search stored document
-        print("\n" + "=" * 60)
-        print("3. SEARCH STORED DOCUMENT")
-        print("=" * 60)
+        # 4. Search for local content
+        print_section("4. SEARCH LOCAL CONTENT")
 
-        query = "medical imaging analysis"
-        print(f"🔍 Searching for: '{query}'")
+        query3 = "Python libraries for data analysis"
+        print(f"🔍 Searching for: '{query3}'")
+        print("💡 This should find the locally stored document...")
 
-        result = search_system.search(query)
-        print(f"📊 Search Results:")
-        print(f"   • Total results: {result.total_results}")
-        print(f"   • Local results: {result.local_results}")
-        print(f"   • Web results: {result.web_results}")
-        print(f"   • Search time: {result.search_time:.2f}s")
-        print(f"   • Cached: {result.cached}")
+        result3 = search_system.search(query3)
+        print(f"\n📊 Search Results:")
+        print(f"   • Total results: {result3.total_results}")
+        print(f"   • Local results: {result3.local_results}")
+        print(f"   • Web results: {result3.web_results}")
+        print(f"   • Search time: {result3.search_time:.2f}s")
+        print(f"   • Cached: {result3.cached}")
 
-        if result.chunks:
-            print(f"📝 Found content:")
-            for i, (chunk, score) in enumerate(result.chunks[:3], 1):
-                print(f"   {i}. [{chunk.source}] Score: {score:.3f}")
+        if result3.chunks:
+            print(f"\n📝 Top results:")
+            for i, (chunk, score) in enumerate(result3.chunks[:3], 1):
+                source = chunk.source_title or "Unknown Source"
+                print(f"   {i}. [{source}] Score: {score:.3f}")
                 content_preview = (
                     chunk.content[:100].replace("\n", " ") + "..." if len(chunk.content) > 100 else chunk.content
                 )
                 print(f"      {content_preview}")
                 if chunk.metadata:
-                    print(f"      Metadata: {chunk.metadata}")
+                    print(f"      📋 Metadata: {chunk.metadata}")
         else:
             print("   No results found")
 
-        # 4. System statistics
-        print("\n" + "=" * 60)
-        print("4. SYSTEM STATISTICS")
-        print("=" * 60)
+        # 5. System statistics
+        print_section("5. SYSTEM STATISTICS")
 
         stats = search_system.get_stats()
         print(f"📊 Connected: {stats.get('connected', False)}")
@@ -202,13 +264,33 @@ def main():
         print(f"📊 Total Chunks: {stats.get('weaviate', {}).get('total_chunks', 0)}")
         print(f"📊 Collection: {stats.get('weaviate', {}).get('collection_name', 'Unknown')}")
 
+        print(f"\n🎯 Demo Summary:")
+        print(f"   • Demonstrated integrated web + vector search")
+        print(f"   • Showed automatic fallback from local to web search")
+        print(f"   • Auto-stored web results for future searches")
+        print(f"   • Combined local and web results in hybrid search")
+
     except Exception as e:
         logger.error(f"❌ Error during execution: {e}")
+        print(f"❌ Demo failed: {e}")
+        print("🔧 Troubleshooting tips:")
+        print("   • Ensure Weaviate is running: docker compose up -d weaviate")
+        print("   • Ensure Ollama is running: docker compose up -d ollama")
+        print("   • Set TAVILY_API_KEY for web search functionality")
+        print("   • Check service logs for detailed error information")
 
     finally:
         print("\n🧹 Cleaning up...")
         search_system.close()
         print("✅ Semantic search system closed")
+
+    print_section("Demo Complete")
+    print("🎉 Integrated semantic search demo completed!")
+    print("\n📚 Key Takeaways:")
+    print("   • The system automatically combines local and web search")
+    print("   • Web results are auto-stored for future local searches")
+    print("   • Fallback threshold controls when web search is triggered")
+    print("   • Hybrid results provide comprehensive search coverage")
 
 
 if __name__ == "__main__":

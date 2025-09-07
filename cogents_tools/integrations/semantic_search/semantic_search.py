@@ -5,19 +5,28 @@ This module provides the main SemanticSearch class that coordinates between
 web search, document processing, vector storage, and semantic retrieval.
 """
 
+import json
 import logging
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
-from cogents_tools.integrations.search import BaseSearch, SearchResult, TavilySearchWrapper
+from cogents_tools.integrations.search import BaseSearch, SearchResult
+
+# Conditional import for TavilySearchWrapper
+try:
+    from cogents_tools.integrations.search import TavilySearchWrapper
+
+    _TAVILY_AVAILABLE = True
+except ImportError:
+    _TAVILY_AVAILABLE = False
 from cogents_tools.integrations.utils.embedgen import EmbeddingGenerator
 from cogents_tools.integrations.vector_store import BaseVectorStore, get_vector_store
 
 from .docproc import ChunkingConfig, DocumentProcessor
 from .models import DocumentChunk
-from .vector_store_adapter import VectorStoreAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +149,14 @@ class SemanticSearch:
         self.config = config or SemanticSearchConfig()
 
         # Initialize components
-        self.web_search = web_search_engine or TavilySearchWrapper()
+        if web_search_engine is None:
+            if _TAVILY_AVAILABLE:
+                self.web_search = TavilySearchWrapper()
+            else:
+                logger.warning("TavilySearchWrapper not available. Web search functionality will be disabled.")
+                self.web_search = None
+        else:
+            self.web_search = web_search_engine
 
         # Initialize vector store
         if vector_store is None:
@@ -153,10 +169,8 @@ class SemanticSearch:
         else:
             self.vector_store = vector_store
 
-        # Initialize embedding generator and adapter
+        # Initialize embedding generator
         self.embedding_generator = EmbeddingGenerator(model=self.config.embedding_model)
-        self.vector_store_adapter = VectorStoreAdapter(self.vector_store, self.embedding_generator)
-
         self.document_processor = DocumentProcessor(self.config.chunking_config)
 
         # Internal state
@@ -229,7 +243,9 @@ class SemanticSearch:
             web_results_count = 0
 
             # Step 2: Determine if web search is needed
-            if force_web_search or len(local_chunks) < self.config.fallback_threshold or not local_chunks:
+            if (
+                force_web_search or len(local_chunks) < self.config.fallback_threshold or not local_chunks
+            ) and self.web_search:
                 # Perform web search
                 web_response = self.web_search.search(query)
 
@@ -278,21 +294,6 @@ class SemanticSearch:
             logger.error(f"Semantic search failed for query '{query}': {e}")
             raise SemanticSearchError(f"Search failed: {e}")
 
-    def _search_local(
-        self, query: str, limit: int, filters: Optional[Dict[str, Any]] = None
-    ) -> List[Tuple[DocumentChunk, float]]:
-        """Search local vector store database."""
-        try:
-            return self.vector_store_adapter.search(
-                query=query,
-                limit=limit,
-                min_score=self.config.min_local_score,
-                filters=filters,
-            )
-        except Exception as e:
-            logger.warning(f"Local search failed: {e}")
-            return []
-
     def _process_and_store_web_results(self, web_response: SearchResult) -> List[Tuple[DocumentChunk, float]]:
         """Process web search results and store in vector store."""
         try:
@@ -314,7 +315,7 @@ class SemanticSearch:
 
             # Store in vector store
             if all_chunks:
-                stored_ids = self.vector_store_adapter.store_chunks(all_chunks)
+                stored_ids = self._store_chunks(all_chunks)
                 logger.info(f"Stored {len(stored_ids)} chunks from web search")
 
                 # Return chunks with default score
@@ -441,7 +442,7 @@ class SemanticSearch:
 
             # Store chunks
             if processed_doc.chunks:
-                stored_ids = self.vector_store_adapter.store_chunks(processed_doc.chunks)
+                stored_ids = self._store_chunks(processed_doc.chunks)
                 logger.info(f"Manually stored document with {len(stored_ids)} chunks")
                 return len(stored_ids)
 
@@ -459,9 +460,9 @@ class SemanticSearch:
             Dict[str, Any]: System statistics
         """
         try:
-            vector_store_stats = self.vector_store_adapter.get_collection_stats()
+            vector_store_stats = self._get_collection_stats()
             processor_stats = self.document_processor.get_stats()
-            web_search_config = self.web_search.get_config()
+            web_search_config = self.web_search.get_config() if self.web_search else {"available": False}
 
             return {
                 "connected": self._connected,
@@ -480,9 +481,169 @@ class SemanticSearch:
         """Clear the query result cache."""
         self._query_cache.clear()
 
+    def _store_chunks(self, chunks: List[DocumentChunk]) -> List[str]:
+        """
+        Store document chunks in the vector store.
+
+        Args:
+            chunks: List of DocumentChunk objects to store
+
+        Returns:
+            List[str]: List of stored chunk IDs
+        """
+        if not chunks:
+            return []
+
+        try:
+            # Extract text content for embedding generation
+            texts = [chunk.content for chunk in chunks]
+
+            # Generate embeddings
+            embeddings = self.embedding_generator.generate_embeddings(texts)
+
+            # Convert chunks to payloads
+            payloads = []
+            ids = []
+
+            for chunk in chunks:
+                # Convert DocumentChunk to payload format expected by vector store
+                payload = {
+                    "content": chunk.content,
+                    "source_url": chunk.source_url or "",
+                    "source_title": chunk.source_title or "",
+                    "chunk_index": chunk.chunk_index,
+                    "timestamp": chunk.timestamp.isoformat()
+                    if chunk.timestamp
+                    else datetime.now(timezone.utc).isoformat(),
+                    "metadata": json.dumps(chunk.metadata) if chunk.metadata else "{}",
+                    "data": chunk.content,  # Required by BaseVectorStore schema
+                    "category": "document_chunk",  # Default category
+                }
+
+                payloads.append(payload)
+
+                # Use existing chunk_id or generate new one
+                chunk_id = chunk.chunk_id if chunk.chunk_id else str(uuid.uuid4())
+                ids.append(chunk_id)
+
+            # Insert into vector store
+            self.vector_store.insert(vectors=embeddings, payloads=payloads, ids=ids)
+
+            logger.info(f"Stored {len(chunks)} chunks in vector store")
+            return ids
+
+        except Exception as e:
+            logger.error(f"Failed to store chunks: {e}")
+            raise
+
+    def _search_local(
+        self, query: str, limit: int, filters: Optional[Dict[str, Any]] = None
+    ) -> List[Tuple[DocumentChunk, float]]:
+        """
+        Perform semantic search and return DocumentChunk objects with scores.
+
+        Args:
+            query: Search query string
+            limit: Maximum number of results
+            filters: Optional filters for search
+
+        Returns:
+            List[Tuple[DocumentChunk, float]]: List of (chunk, score) tuples
+        """
+        try:
+            # Generate embedding for query
+            query_embedding = self.embedding_generator.generate_embedding(query)
+
+            # Search in vector store
+            search_results = self.vector_store.search(
+                query=query,
+                vectors=query_embedding,
+                limit=limit,
+                filters=filters,
+            )
+
+            # Convert results back to DocumentChunk format
+            results = []
+            for output_data in search_results:
+                # Skip results below minimum score
+                score = output_data.score or 0.0
+                if score < self.config.min_local_score:
+                    continue
+
+                # Extract data from payload
+                payload = output_data.payload
+
+                # Parse metadata
+                try:
+                    metadata = json.loads(payload.get("metadata", "{}"))
+                except (json.JSONDecodeError, TypeError):
+                    metadata = {}
+
+                # Parse timestamp
+                try:
+                    timestamp_str = payload.get("timestamp")
+                    if timestamp_str:
+                        timestamp = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+                    else:
+                        timestamp = datetime.now(timezone.utc)
+                except (ValueError, TypeError):
+                    timestamp = datetime.now(timezone.utc)
+
+                # Create DocumentChunk from payload
+                chunk_index = payload.get("chunk_index")
+                if chunk_index is None:
+                    chunk_index = 0
+                elif not isinstance(chunk_index, int):
+                    try:
+                        chunk_index = int(chunk_index)
+                    except (ValueError, TypeError):
+                        chunk_index = 0
+
+                chunk = DocumentChunk(
+                    chunk_id=output_data.id,
+                    content=payload.get("content", payload.get("data", "")),
+                    source_url=payload.get("source_url"),
+                    source_title=payload.get("source_title"),
+                    chunk_index=chunk_index,
+                    timestamp=timestamp,
+                    metadata=metadata,
+                )
+
+                results.append((chunk, score))
+
+            logger.debug(f"Found {len(results)} chunks matching query: {query}")
+            return results
+
+        except Exception as e:
+            logger.error(f"Search failed: {e}")
+            raise
+
+    def _get_collection_stats(self) -> Dict[str, Any]:
+        """
+        Get statistics about the collection.
+
+        Returns:
+            Dict[str, Any]: Collection statistics
+        """
+        try:
+            col_info = self.vector_store.collection_info()
+            return {
+                "collection_name": getattr(self.vector_store, "collection_name", "unknown"),
+                "embedding_model_dims": self.vector_store.embedding_model_dims,
+                "collection_info": col_info,
+            }
+        except Exception as e:
+            logger.error(f"Failed to get collection stats: {e}")
+            return {"error": str(e)}
+
     def close(self) -> None:
         """Close connections and cleanup resources."""
-        if self.vector_store_adapter:
-            self.vector_store_adapter.close()
+        # BaseVectorStore doesn't have a standard close method
+        # Individual implementations might have cleanup methods
+        if hasattr(self.vector_store, "close"):
+            self.vector_store.close()
+        elif hasattr(self.vector_store, "client") and hasattr(self.vector_store.client, "close"):
+            self.vector_store.client.close()
+
         self._connected = False
         self.clear_cache()
