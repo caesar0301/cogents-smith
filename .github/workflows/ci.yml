@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,4 +51,4 @@ jobs:
             htmlcov/
             .coverage
             .flake8
-          retention-days: 7 
+          retention-days: 7
