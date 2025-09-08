@@ -3,7 +3,7 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field
 
-from cogents_tools.integrations.bu.llm.views import ChatInvokeUsage
+from cogents_tools.integrations.llm import ChatInvokeUsage
 
 T = TypeVar("T", bound=BaseModel)
 

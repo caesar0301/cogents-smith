@@ -14,14 +14,14 @@ from typing import Any, Generic, Literal, TypeVar
 from dotenv import load_dotenv
 
 from cogents_tools.integrations.bu.agent.message_manager.utils import save_conversation
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
-from cogents_tools.integrations.bu.llm.messages import (
+from cogents_tools.integrations.llm import BaseChatModel
+from cogents_tools.integrations.llm import (
     BaseMessage,
-    ContentPartImageParam,
-    ContentPartTextParam,
+    ContentImage,
+    ContentText,
     UserMessage,
 )
-from cogents_tools.integrations.bu.llm.openai.chat import ChatOpenAI
+from cogents_tools.integrations.llm import ChatOpenAI
 from cogents_tools.integrations.bu.tokens.service import TokenCost
 
 load_dotenv()
@@ -168,14 +168,14 @@ class Agent(Generic[Context, AgentStructuredOutput]):
         step_timeout: int = 120,
         directly_open_url: bool = True,
         include_recent_events: bool = False,
-        sample_images: list[ContentPartTextParam | ContentPartImageParam] | None = None,
+        sample_images: list[ContentText | ContentImage] | None = None,
         **kwargs,
     ):
         if llm is None:
             default_llm_name = CONFIG.DEFAULT_LLM
             if default_llm_name:
                 try:
-                    from cogents_tools.integrations.bu.llm.models import get_llm_by_name
+                    from cogents_tools.integrations.llm import get_llm_by_name
 
                     llm = get_llm_by_name(default_llm_name)
                 except (ImportError, ValueError) as e:

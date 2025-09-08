@@ -11,7 +11,7 @@ load_dotenv()
 from examples.integrations.slack.slack_api import SlackBot, app
 
 from cogents_tools.integrations.bu.browser import BrowserProfile
-from cogents_tools.integrations.bu.llm import ChatGoogle
+from cogents_tools.integrations.llm import ChatGoogle
 
 # load credentials from environment variables
 bot_token = os.getenv("SLACK_BOT_TOKEN")

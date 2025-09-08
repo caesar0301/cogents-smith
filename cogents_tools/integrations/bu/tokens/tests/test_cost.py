@@ -7,8 +7,8 @@ Tests ChatOpenAI and ChatGoogle by iteratively generating countries.
 import asyncio
 import logging
 
-from cogents_tools.integrations.bu.llm import ChatOpenAI
-from cogents_tools.integrations.bu.llm.messages import AssistantMessage, SystemMessage, UserMessage
+from cogents_tools.integrations.llm import ChatOpenAI
+from cogents_tools.integrations.llm import AssistantMessage, SystemMessage, UserMessage
 from cogents_tools.integrations.bu.tokens.service import TokenCost
 
 logger = logging.getLogger(__name__)

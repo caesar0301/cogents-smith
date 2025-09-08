@@ -22,7 +22,7 @@ from cogents_tools.integrations.bu.dom.views import DEFAULT_INCLUDE_ATTRIBUTES, 
 # )
 # from cogents_tools.integrations.bu.dom.views import SelectorMap
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystemState
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
+from cogents_tools.integrations.llm import BaseChatModel
 from cogents_tools.integrations.bu.tokens.views import UsageSummary
 from cogents_tools.integrations.bu.tools.registry.views import ActionModel
 

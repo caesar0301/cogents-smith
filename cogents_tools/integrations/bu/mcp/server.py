@@ -79,7 +79,7 @@ from cogents_tools.integrations.bu import ActionModel, Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
 from cogents_tools.integrations.bu.config import get_default_llm, get_default_profile, load_browser_use_config
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
-from cogents_tools.integrations.bu.llm.openai.chat import ChatOpenAI
+from cogents_tools.integrations.llm import ChatOpenAI
 from cogents_tools.integrations.bu.tools.service import Tools
 
 logger = logging.getLogger(__name__)

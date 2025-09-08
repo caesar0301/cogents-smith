@@ -31,7 +31,7 @@ from cogents_tools.integrations.bu.tools.service import Tools
 
 def get_llm(provider: str):
     if provider == "anthropic":
-        from cogents_tools.integrations.bu.llm import ChatAnthropic
+        from cogents_tools.integrations.llm import ChatAnthropic
 
         api_key = os.getenv("ANTHROPIC_API_KEY")
         if not api_key:

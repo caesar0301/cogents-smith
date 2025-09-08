@@ -12,7 +12,7 @@ from discord.ext import commands  # type: ignore
 
 from cogents_tools.integrations.bu.agent.service import Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
-from cogents_tools.integrations.bu.llm import BaseChatModel
+from cogents_tools.integrations.llm import BaseChatModel
 
 
 class DiscordBot(commands.Bot):

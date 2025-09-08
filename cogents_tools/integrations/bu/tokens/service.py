@@ -16,8 +16,8 @@ import aiofiles
 import httpx
 from dotenv import load_dotenv
 
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
-from cogents_tools.integrations.bu.llm.views import ChatInvokeUsage
+from cogents_tools.integrations.llm import BaseChatModel
+from cogents_tools.integrations.llm import ChatInvokeUsage
 from cogents_tools.integrations.bu.tokens.views import (
     CachedPricingData,
     ModelPricing,

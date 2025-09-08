@@ -29,8 +29,8 @@ from cogents_tools.integrations.bu.browser.events import (
 from cogents_tools.integrations.bu.browser.views import BrowserError
 from cogents_tools.integrations.bu.dom.service import EnhancedDOMTreeNode
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
-from cogents_tools.integrations.bu.llm.messages import SystemMessage, UserMessage
+from cogents_tools.integrations.llm import BaseChatModel
+from cogents_tools.integrations.llm import SystemMessage, UserMessage
 from cogents_tools.integrations.bu.observability import observe_debug
 from cogents_tools.integrations.bu.tools.registry.service import Registry
 from cogents_tools.integrations.bu.tools.views import (

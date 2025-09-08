@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field, RootModel, create_model
 
 from cogents_tools.integrations.bu.browser import BrowserSession
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
+from cogents_tools.integrations.llm import BaseChatModel
 from cogents_tools.integrations.bu.observability import observe_debug
 from cogents_tools.integrations.bu.tools.registry.views import (
     ActionModel,

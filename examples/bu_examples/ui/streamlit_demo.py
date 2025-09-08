@@ -28,7 +28,7 @@ if os.name == "nt":
 # Function to get the LLM based on provider
 def get_llm(provider: str):
     if provider == "anthropic":
-        from cogents_tools.integrations.bu.llm import ChatAnthropic
+        from cogents_tools.integrations.llm import ChatAnthropic
 
         api_key = os.getenv("ANTHROPIC_API_KEY")
         if not api_key:

@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 from cogents_tools.integrations.bu.browser import BrowserSession
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
+from cogents_tools.integrations.llm import BaseChatModel
 
 if TYPE_CHECKING:
     pass

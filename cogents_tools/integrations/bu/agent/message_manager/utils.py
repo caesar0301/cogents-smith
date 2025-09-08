@@ -7,7 +7,7 @@ from typing import Any
 
 import anyio
 
-from cogents_tools.integrations.bu.llm.messages import BaseMessage
+from cogents_tools.integrations.llm import BaseMessage
 
 logger = logging.getLogger(__name__)
 

@@ -52,13 +52,13 @@ if TYPE_CHECKING:
     from cogents_tools.integrations.bu.browser import BrowserSession
     from cogents_tools.integrations.bu.browser import BrowserSession as Browser
     from cogents_tools.integrations.bu.dom.service import DomService
-    from cogents_tools.integrations.bu.llm import models
-    from cogents_tools.integrations.bu.llm.anthropic.chat import ChatAnthropic
-    from cogents_tools.integrations.bu.llm.azure.chat import ChatAzureOpenAI
-    from cogents_tools.integrations.bu.llm.google.chat import ChatGoogle
-    from cogents_tools.integrations.bu.llm.groq.chat import ChatGroq
-    from cogents_tools.integrations.bu.llm.ollama.chat import ChatOllama
-    from cogents_tools.integrations.bu.llm.openai.chat import ChatOpenAI
+    from cogents_tools.integrations.llm import models
+    from cogents_tools.integrations.llm import ChatAnthropic
+    from cogents_tools.integrations.llm import ChatAzureOpenAI
+    from cogents_tools.integrations.llm import ChatGoogle
+    from cogents_tools.integrations.llm import ChatGroq
+    from cogents_tools.integrations.llm import ChatOllama
+    from cogents_tools.integrations.llm import ChatOpenAI
     from cogents_tools.integrations.bu.tools.service import Controller, Tools
 
 
@@ -81,14 +81,14 @@ _LAZY_IMPORTS = {
     # DOM service (moderate weight)
     "DomService": ("cogents_tools.integrations.bu.dom.service", "DomService"),
     # Chat models (very heavy imports)
-    "ChatOpenAI": ("cogents_tools.integrations.bu.llm.openai.chat", "ChatOpenAI"),
-    "ChatGoogle": ("cogents_tools.integrations.bu.llm.google.chat", "ChatGoogle"),
-    "ChatAnthropic": ("cogents_tools.integrations.bu.llm.anthropic.chat", "ChatAnthropic"),
-    "ChatGroq": ("cogents_tools.integrations.bu.llm.groq.chat", "ChatGroq"),
-    "ChatAzureOpenAI": ("cogents_tools.integrations.bu.llm.azure.chat", "ChatAzureOpenAI"),
-    "ChatOllama": ("cogents_tools.integrations.bu.llm.ollama.chat", "ChatOllama"),
+    "ChatOpenAI": ("cogents_tools.integrations.llm", "ChatOpenAI"),
+    "ChatGoogle": ("cogents_tools.integrations.llm", "ChatGoogle"),
+    "ChatAnthropic": ("cogents_tools.integrations.llm", "ChatAnthropic"),
+    "ChatGroq": ("cogents_tools.integrations.llm", "ChatGroq"),
+    "ChatAzureOpenAI": ("cogents_tools.integrations.llm", "ChatAzureOpenAI"),
+    "ChatOllama": ("cogents_tools.integrations.llm", "ChatOllama"),
     # LLM models module
-    "models": ("cogents_tools.integrations.bu.llm.models", None),
+    "models": ("cogents_tools.integrations.llm", None),
 }
 
 

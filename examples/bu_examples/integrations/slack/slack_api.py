@@ -16,7 +16,7 @@ from slack_sdk.web.async_client import AsyncWebClient  # type: ignore
 
 from cogents_tools.integrations.bu.agent.service import Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
-from cogents_tools.integrations.bu.llm import BaseChatModel
+from cogents_tools.integrations.llm import BaseChatModel
 from cogents_tools.integrations.bu.logging_config import setup_logging
 
 setup_logging()
