@@ -10,9 +10,9 @@ load_dotenv()
 
 from pydantic import BaseModel
 
-from cogents_tools.integrations.bu import ChatOpenAI
 from cogents_tools.integrations.bu.agent.service import Agent
 from cogents_tools.integrations.bu.tools.service import Tools
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 # Initialize tools first
 tools = Tools()
@@ -40,7 +40,7 @@ def save_models(params: Models):
 async def main():
     task = "Look up models with a license of cc-by-sa-4.0 and sort by most likes on Hugging face, save top 5 to file."
 
-    model = ChatOpenAI(model="gpt-4.1-mini")
+    model = get_llm_client_browser_compatible()
     agent = Agent(task=task, llm=model, tools=tools)
 
     await agent.run()

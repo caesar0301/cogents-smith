@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import ChatOpenAI
 from cogents_tools.integrations.bu.agent.service import Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 browser_session = BrowserSession(
     browser_profile=BrowserProfile(
@@ -20,14 +20,13 @@ browser_session = BrowserSession(
         user_data_dir="~/.config/browseruse/profiles/default",
     )
 )
-llm = ChatOpenAI(model="gpt-4.1-mini")
 
 
 # NOTE: This is experimental - you will have multiple agents running in the same browser session
 async def main():
     await browser_session.start()
     agents = [
-        Agent(task=task, llm=llm, browser_session=browser_session)
+        Agent(task=task, llm=get_llm_client_browser_compatible(), browser_session=browser_session)
         for task in [
             "Search Google for weather in Tokyo",
             "Check Reddit front page title",

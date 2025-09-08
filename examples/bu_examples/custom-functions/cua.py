@@ -24,9 +24,10 @@ load_dotenv()
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI, Tools
+from cogents_tools.integrations.bu import Agent, Tools
 from cogents_tools.integrations.bu.agent.views import ActionResult
 from cogents_tools.integrations.bu.browser import BrowserSession
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 
 class OpenAICUAAction(BaseModel):
@@ -271,10 +272,7 @@ async def openai_cua_fallback(params: OpenAICUAAction, browser_session: BrowserS
 
 async def main():
     # Initialize the language model
-    llm = ChatOpenAI(
-        model="o4-mini",
-        temperature=1.0,
-    )
+    llm = get_llm_client_browser_compatible()
 
     # Create browser session
     browser_session = BrowserSession()

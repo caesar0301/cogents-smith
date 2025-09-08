@@ -5,7 +5,8 @@ import shutil
 
 from dotenv import load_dotenv
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI
+from cogents_tools.integrations.bu import Agent
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 load_dotenv()
 
@@ -29,7 +30,7 @@ NOTE: DO NOT USE extract_structured_data action - everything is visible in brows
     "\n"
 )
 
-llm = ChatOpenAI(model="gpt-4.1-mini")
+llm = get_llm_client_browser_compatible()
 
 agent = Agent(
     task=task,

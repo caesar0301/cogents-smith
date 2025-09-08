@@ -5,7 +5,8 @@ import shutil
 
 from dotenv import load_dotenv
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI
+from cogents_tools.integrations.bu import Agent
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ Read the PDF and save 3 interesting data points in "alphabet_earnings.pdf" and s
 
 agent = Agent(
     task=task,
-    llm=ChatOpenAI(model="o4-mini"),
+    llm=get_llm_client_browser_compatible(),
     file_system_path=str(agent_dir / "fs"),
     flash_mode=True,
 )

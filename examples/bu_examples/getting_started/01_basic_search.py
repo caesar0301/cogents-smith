@@ -9,11 +9,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI
+from cogents_tools.integrations.bu import Agent
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 
 async def main():
-    llm = ChatOpenAI(model="gpt-4.1-mini")
+    llm = get_llm_client_browser_compatible()
     task = "Search Google for 'what is browser automation' and tell me the top 3 results"
     agent = Agent(task=task, llm=llm)
     await agent.run()

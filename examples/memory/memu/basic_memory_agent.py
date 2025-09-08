@@ -46,7 +46,7 @@ def main():
             llm_client=llm_client,
             agent_id="example_agent",
             user_id="basic_user",
-            memory_dir="./examples/memory_agent/basic_memory_storage",
+            memory_dir="/tmp/memory_agent/basic_memory_storage",
             enable_embeddings=True,
         )
 
@@ -171,7 +171,7 @@ USER: I usually go to the mountains near my city. The views are amazing!"""
         print(f"   Memory Directory: {status.get('memory_dir')}")
 
         print("\n✅ Basic memory agent example completed successfully!")
-        print("\n📁 Check the memory files in: ./examples/memory_agent/basic_memory_storage/")
+        print("\n📁 Check the memory files in: /tmp/memory_agent/basic_memory_storage/")
 
     except Exception as e:
         logger.error(f"Error in basic memory agent example: {e}")

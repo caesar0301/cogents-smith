@@ -12,32 +12,30 @@ from cogents_tools.integrations.bu.llm.views import ChatInvokeCompletion
 dotenv.load_dotenv()
 
 
-def get_llm_client_browser_compatible(instructor=True, **kwargs) -> BaseLLMClient:
+def get_llm_client_browser_compatible(structured_output=True, **kwargs) -> BaseLLMClient:
     """
     Get an LLM client with optional memory system compatibility
 
     Args:
-        instructor: Whether to enable instructor mode for structured output
-        memory_compatible: Whether to wrap client for memory system compatibility
+        structured_output: Whether to enable structured output
 
     Returns:
         BaseLLMClient: Configured LLM client
     """
-    return BULLMAdapter(get_llm_client(instructor=instructor, **kwargs))
+    return BULLMAdapter(get_llm_client(structured_output=structured_output, **kwargs))
 
 
-def get_llm_client_memory_compatible(instructor=True, **kwargs) -> BaseLLMClient:
+def get_llm_client_memory_compatible(structured_output=True, **kwargs) -> BaseLLMClient:
     """
     Get an LLM client with optional memory system compatibility
 
     Args:
-        instructor: Whether to enable instructor mode for structured output
-        memory_compatible: Whether to wrap client for memory system compatibility
+        structured_output: Whether to enable structured output
 
     Returns:
         BaseLLMClient: Configured LLM client
     """
-    return MemoryLLMAdapter(get_llm_client(instructor=instructor, **kwargs))
+    return MemoryLLMAdapter(get_llm_client(structured_output=structured_output, **kwargs))
 
 
 class BaseLLMAdapter:

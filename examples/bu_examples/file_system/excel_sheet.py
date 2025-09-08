@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from cogents_tools.integrations.bu import Agent
-from cogents_tools.integrations.bu.llm.google.chat import ChatGoogle
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
-llm = ChatGoogle(model="gemini-2.5-flash")
+llm = get_llm_client_browser_compatible()
 
 
 task = "Find current stock price of companies Meta and Amazon. Then, make me a CSV file with 2 columns: company name, stock price."

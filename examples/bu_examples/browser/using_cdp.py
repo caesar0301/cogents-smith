@@ -27,7 +27,7 @@ load_dotenv()
 
 from cogents_tools.integrations.bu import Agent, Tools
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
-from cogents_tools.integrations.bu.llm import ChatOpenAI
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 browser_session = BrowserSession(browser_profile=BrowserProfile(cdp_url="http://localhost:9222", is_local=True))
 tools = Tools()
@@ -36,7 +36,7 @@ tools = Tools()
 async def main():
     agent = Agent(
         task='Visit https://duckduckgo.com and search for "browser-use founders"',
-        lllm=ChatOpenAI(model="gpt-4.1-mini"),
+        llm=get_llm_client_browser_compatible(),
         tools=tools,
         browser_session=browser_session,
     )

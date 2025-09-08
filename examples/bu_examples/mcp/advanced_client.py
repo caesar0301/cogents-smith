@@ -13,8 +13,8 @@ import asyncio
 import os
 
 from cogents_tools.integrations.bu import Agent, Tools
-from cogents_tools.integrations.bu.llm.openai.chat import ChatOpenAI
 from cogents_tools.integrations.bu.mcp.client import MCPClient
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 
 async def main():
@@ -54,7 +54,7 @@ async def main():
     # Create agent with extended system prompt for using multiple MCP servers
     agent = Agent(
         task="Sign up for a new Anthropic account using the email example@gmail.com, save the registration details to a file",
-        llm=ChatOpenAI(model="gpt-4.1-mini"),
+        llm=get_llm_client_browser_compatible(),
         tools=tools,
         extend_system_message="""
 You have access to both Gmail and Filesystem tools through MCP servers. When signing up for accounts:

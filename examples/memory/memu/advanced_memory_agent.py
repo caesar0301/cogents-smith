@@ -282,7 +282,7 @@ def main():
             llm_client=llm_client,
             agent_id="advanced_agent",
             user_id="demo_user",
-            memory_dir="./examples/memory_agent/advanced_memory_storage",
+            memory_dir="/tmp/memory_agent/advanced_memory_storage",
             enable_embeddings=True,
         )
 
@@ -318,7 +318,7 @@ def main():
         demonstrate_advanced_features(memory_agent)
 
         print("\n✅ Advanced memory agent example completed successfully!")
-        print("\n📁 Check the memory files in: ./examples/memory_agent/advanced_memory_storage/")
+        print("\n📁 Check the memory files in: /tmp/memory_agent/advanced_memory_storage/")
         print("\n🎯 Key Advanced Features Demonstrated:")
         print("   • Automated conversation processing with LLM function calling")
         print("   • Theory of mind analysis and psychological insights")

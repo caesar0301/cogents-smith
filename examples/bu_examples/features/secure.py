@@ -53,12 +53,13 @@ load_dotenv()
 os.environ["ANONYMIZED_TELEMETRY"] = "false"
 
 
-from cogents_tools.integrations.bu import Agent, BrowserProfile, ChatAzureOpenAI
+from cogents_tools.integrations.bu import Agent, BrowserProfile
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 # Configuration LLM
 api_key = os.getenv("AZURE_OPENAI_KEY")
 azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-llm = ChatAzureOpenAI(model="gpt-4.1-mini", api_key=api_key, azure_endpoint=azure_endpoint)
+llm = get_llm_client_browser_compatible()
 
 # Configuration Task
 task = "Find the founders of the sensitive company_name"

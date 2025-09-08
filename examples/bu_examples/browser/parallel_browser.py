@@ -1,6 +1,7 @@
 import asyncio
 
-from cogents_tools.integrations.bu import Agent, Browser, ChatOpenAI
+from cogents_tools.integrations.bu import Agent, Browser
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 # NOTE: This is still experimental, and agents might conflict each other.
 
@@ -20,17 +21,17 @@ async def main():
         Agent(
             task='Search for "browser automation" on Google',
             browser=browsers[0],
-            llm=ChatOpenAI(model="gpt-4.1-mini"),
+            llm=get_llm_client_browser_compatible(),
         ),
         Agent(
             task='Search for "AI agents" on DuckDuckGo',
             browser=browsers[1],
-            llm=ChatOpenAI(model="gpt-4.1-mini"),
+            llm=get_llm_client_browser_compatible(),
         ),
         Agent(
             task='Visit Wikipedia and search for "web scraping"',
             browser=browsers[2],
-            llm=ChatOpenAI(model="gpt-4.1-mini"),
+            llm=get_llm_client_browser_compatible(),
         ),
     ]
 

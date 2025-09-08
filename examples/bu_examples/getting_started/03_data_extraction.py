@@ -21,12 +21,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI
+from cogents_tools.integrations.bu import Agent
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 
 async def main():
     # Initialize the model
-    llm = ChatOpenAI(model="gpt-4.1-mini")
+    llm = get_llm_client_browser_compatible()
 
     # Define a data extraction task
     task = """

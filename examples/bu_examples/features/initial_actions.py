@@ -8,9 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI
-
-llm = ChatOpenAI(model="gpt-4.1-mini")
+from cogents_tools.integrations.bu import Agent
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 initial_actions = [
     {"go_to_url": {"url": "https://www.google.com", "new_tab": True}},
@@ -19,7 +18,7 @@ initial_actions = [
 agent = Agent(
     task="What theories are displayed on the page?",
     initial_actions=initial_actions,
-    llm=llm,
+    llm=get_llm_client_browser_compatible(),
 )
 
 

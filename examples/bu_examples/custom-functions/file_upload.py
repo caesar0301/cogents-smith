@@ -17,11 +17,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import ChatOpenAI
 from cogents_tools.integrations.bu.agent.service import Agent, Tools
 from cogents_tools.integrations.bu.agent.views import ActionResult
 from cogents_tools.integrations.bu.browser import BrowserSession
 from cogents_tools.integrations.bu.browser.events import UploadFileEvent
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ async def main():
     """Main function to run the example"""
     browser_session = BrowserSession()
     await browser_session.start()
-    llm = ChatOpenAI(model="gpt-4.1-mini")
+    llm = get_llm_client_browser_compatible()
 
     # List of file paths the agent is allowed to upload
     # In a real scenario, you'd want to be very careful about what files

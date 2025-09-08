@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import Agent, Browser, ChatOpenAI
+from cogents_tools.integrations.bu import Agent, Browser
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 # Connect to your existing Chrome browser
 browser = Browser(
@@ -20,7 +21,7 @@ browser = Browser(
 
 async def main():
     agent = Agent(
-        llm=ChatOpenAI(model="gpt-4.1-mini"),
+        llm=get_llm_client_browser_compatible(),
         # Google blocks this approach, so we use a different search engine
         task='Visit https://duckduckgo.com and search for "browser-use founders"',
         browser=browser,

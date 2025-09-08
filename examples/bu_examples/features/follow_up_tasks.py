@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from cogents_tools.integrations.bu import Agent
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 profile = BrowserProfile(keep_alive=True)
 
@@ -19,7 +20,7 @@ task = """Go to reddit.com"""
 
 
 async def main():
-    agent = Agent(task=task, browser_profile=profile)
+    agent = Agent(task=task, browser_profile=profile, llm=get_llm_client_browser_compatible())
     await agent.run(max_steps=1)
 
     while True:

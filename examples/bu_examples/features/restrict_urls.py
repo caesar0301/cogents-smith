@@ -8,10 +8,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI
+from cogents_tools.integrations.bu import Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
-llm = ChatOpenAI(model="gpt-4.1-mini")
+llm = get_llm_client_browser_compatible()
 task = "go to google.com and search for openai.com and click on the first link then extract content and scroll down - what's there?"
 
 allowed_domains = ["google.com"]

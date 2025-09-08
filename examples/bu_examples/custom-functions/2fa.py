@@ -11,7 +11,8 @@ load_dotenv()
 
 import pyotp  # type: ignore
 
-from cogents_tools.integrations.bu import ActionResult, Agent, ChatOpenAI, Tools
+from cogents_tools.integrations.bu import ActionResult, Agent, Tools
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -55,7 +56,7 @@ async def main():
 	You are completely FORBIDDEN to use any other method to get the 2FA code.
 	"""
 
-    model = ChatOpenAI(model="gpt-4.1-mini")
+    model = get_llm_client_browser_compatible()
     agent = Agent(task=task, llm=model, tools=tools)
 
     result = await agent.run()

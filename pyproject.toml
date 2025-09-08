@@ -23,80 +23,73 @@ classifiers = [
 packages = [{include = "cogents_tools"}]
 
 [tool.poetry.dependencies]
+# Core required dependencies only
 python = "^3.12"
-cogents-core = "^0.1.8,<0.2.0"
-aiohttp = "^3.9.0"  # Common HTTP client
-
-# LLM tracing
-opik = { version = "^0.2.0", optional = true }
-
-# Vector store
-weaviate-client = { version = "^4.16.9", optional = true }
-
-# === Academic Research Group ===
-# arxiv_toolkit dependencies
-arxiv = { version = "^2.2.0", optional = true }
-
-# === Image Processing Group ===
-# image_toolkit dependencies  
-pillow = { version = "^10.0.0", optional = true }
-
-# === Audio Processing Group ===
-# audio_aliyun_toolkit dependencies
-aliyun-python-sdk-core = { version = "^2.13.1,<3.0.0", optional = true }
-
-# === Development Tools Group ===
-# bash_toolkit, python_executor_toolkit dependencies
-matplotlib = { version = "^3.8.0", optional = true }
-pexpect = { version = "^4.9.0", optional = true }
-ipython = { version = "^8.18.0", optional = true }
-
-# === File Processing Group ===
-# document_toolkit, tabular_data_toolkit dependencies
-pandas = { version = "^2.0.0", optional = true }
-pymupdf = { version = "^1.23.0", optional = true }
-openpyxl = { version = "^3.1.5", optional = true }
-
-# === Communication Group ===
-# gmail_toolkit dependencies
-google-api-python-client = { version = "^2.0.0", optional = true }
-google-auth-oauthlib = { version = "^1.0.0", optional = true }
-google-auth = { version = "^2.0.0", optional = true }
-aiofiles = { version = "^24.1.0", optional = true }
-
-# === Information Retrieval Group ===
-# search_toolkit, serper_toolkit, wikipedia_toolkit dependencies
-tavily-python = { version = "^0.3.0", optional = true }
-langchain-tavily = { version = "^0.2.11", optional = true }
-wikipedia-api = { version = "^0.6.0", optional = true }
-
-# === Memory/Persistence Group ===
-# memory_toolkit dependencies
-psycopg2 = { version = "^2.9.10", optional = true }
-psycopg2-binary = { version = "^2.9.0", optional = true }
+cogents-core = "^0.1.8.1,<0.2.0"
+aiohttp = "^3.12.15"
+aiofiles = "^24.1.0"
+anyio = "^4.9.0"
+httpx = "^0.28.1"
 psutil = "^7.0.0"
 
-[tool.poetry.extras]
-# Semantic toolkit groups - install only what you need
-academic = ["arxiv"]
-image = ["pillow"]
-video = []  # No additional deps yet
-audio = ["aliyun-python-sdk-core"]
-development = ["matplotlib", "pexpect", "ipython"]
-file_processing = ["pandas", "pymupdf", "openpyxl"]
-communication = ["google-api-python-client", "google-auth-oauthlib", "google-auth", "aiofiles"]
-info_retrieval = ["tavily-python", "langchain-tavily", "wikipedia-api"]
-memorization = ["psycopg2", "psycopg2-binary"]
-hitl = []  # No additional deps
+# === LLM Observability Group ===
+[tool.poetry.group.observability.dependencies]
+opik = "^0.2.0"
 
-# Convenience groups
-all = [
-    "arxiv", "pillow", "aliyun-python-sdk-core", "matplotlib", "pexpect", "ipython",
-    "pandas", "pymupdf", "openpyxl", "google-api-python-client", "google-auth-oauthlib",
-    "google-auth", "aiofiles", "tavily-python", "langchain-tavily", "wikipedia-api",
-    "opik", "psycopg2", "psycopg2-binary", "weaviate-client"
-]
+# === Academic Research Group ===
+[tool.poetry.group.academic.dependencies]
+arxiv = "^2.2.0"
 
+# === Development Tools Group ===
+[tool.poetry.group.development.dependencies]
+matplotlib = "^3.8.0"
+pexpect = "^4.9.0"
+ipython = "^8.18.0"
+pandas = "^2.0.0"
+
+# === Multimedia Group ===
+[tool.poetry.group.multimedia.dependencies]
+pillow = "^11.2.1"
+pymupdf = "^1.23.0"
+openpyxl = "^3.1.5"
+aliyun-python-sdk-core = "^2.13.1,<3.0.0"
+
+# === Communication Group ===
+[tool.poetry.group.communication.dependencies]
+google-api-python-client = "^2.174.0"
+google-auth-oauthlib = "^1.2.2"
+google-auth = "^2.40.3"
+
+# === Information Retrieval Group ===
+[tool.poetry.group.info-retrieval.dependencies]
+tavily-python = "^0.3.0"
+langchain-tavily = "^0.2.11"
+wikipedia-api = "^0.6.0"
+
+# === Memory/Persistence Group ===
+[tool.poetry.group.memorization.dependencies]
+psycopg2 = "^2.9.10"
+psycopg2-binary = "^2.9.0"
+weaviate-client = "^4.16.9"
+
+# === Browser Use Group ===
+[tool.poetry.group.browseruse.dependencies]
+portalocker = "^2.7.0,<3.0.0"
+posthog = "^3.7.0"
+pyobjc = "^11.0"
+screeninfo = "^0.8.1"
+uuid7 = "^0.1.0"
+authlib = "^1.6.0"
+anthropic = "^0.58.2,<1.0.0"
+groq = "^0.30.0"
+google-api-core = "^2.25.0"
+google-genai = "^1.29.0,<2.0.0"
+pypdf = "^5.7.0"
+cdp-use = "^1.4.0"
+markdown-pdf = "^1.5"
+html2text = "^2025.4.15"
+
+# === Development Group ===
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.2,<9"
 pytest-cov = "^4.0.0"
@@ -144,4 +137,4 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
-] 
+]

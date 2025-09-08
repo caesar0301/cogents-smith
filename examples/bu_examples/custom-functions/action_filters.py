@@ -27,9 +27,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import ChatOpenAI
 from cogents_tools.integrations.bu.agent.service import Agent, Tools
 from cogents_tools.integrations.bu.browser import BrowserSession
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 # Initialize tools and registry
 tools = Tools()
@@ -95,7 +95,7 @@ async def main():
     """Main function to run the example"""
     browser_session = BrowserSession()
     await browser_session.start()
-    llm = ChatOpenAI(model="gpt-4.1-mini")
+    llm = get_llm_client_browser_compatible()
 
     # Create the agent
     agent = Agent(  # disco mode will not be triggered on apple.com because the LLM won't be able to see that action available, it should work on Google.com though.

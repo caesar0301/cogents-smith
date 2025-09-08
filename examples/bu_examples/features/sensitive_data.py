@@ -8,14 +8,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI
+from cogents_tools.integrations.bu import Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 # Initialize the model
-llm = ChatOpenAI(
-    model="gpt-4.1",
-    temperature=0.0,
-)
+llm = get_llm_client_browser_compatible()
+
 # Simple case: the model will see x_name and x_password, but never the actual values.
 # sensitive_data = {'x_name': 'my_x_name', 'x_password': 'my_x_password'}
 

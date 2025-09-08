@@ -11,7 +11,8 @@ load_dotenv()
 
 from examples.integrations.agentmail.email_tools import EmailTools
 
-from cogents_tools.integrations.bu import Agent, Browser, models
+from cogents_tools.integrations.bu import Agent, Browser
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 TASK = """
 Go to reddit.com, create a new account (use the get_email_address), make up password and all other information, confirm the 2fa with get_latest_email, and like latest post on r/elon subreddit.
@@ -29,7 +30,7 @@ async def main():
     tools = EmailTools(email_client=email_client, inbox=inbox)
 
     # Initialize the LLM for browser-use agent
-    llm = models.azure_gpt_4_1_mini
+    llm = get_llm_client_browser_compatible()
 
     # Set your local browser path
     browser = Browser(executable_path="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")

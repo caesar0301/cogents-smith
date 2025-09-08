@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import ActionResult, Agent, ChatOpenAI, Tools
+from cogents_tools.integrations.bu import ActionResult, Agent, Tools
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 tools = Tools()
 
@@ -33,7 +34,7 @@ async def done(text: str):
 
 async def main():
     task = "go to brower-use.com and then done"
-    model = ChatOpenAI(model="gpt-4.1-mini")
+    model = get_llm_client_browser_compatible()
     agent = Agent(task=task, llm=model, tools=tools)
 
     await agent.run()

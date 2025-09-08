@@ -16,7 +16,8 @@ load_dotenv()
 
 from pydantic import BaseModel
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI
+from cogents_tools.integrations.bu import Agent
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 
 class Post(BaseModel):
@@ -32,7 +33,7 @@ class Posts(BaseModel):
 
 async def main():
     task = "Go to hackernews show hn and give me the first  5 posts"
-    model = ChatOpenAI(model="gpt-4.1-mini")
+    model = get_llm_client_browser_compatible()
     agent = Agent(task=task, llm=model, output_model_schema=Posts)
 
     history = await agent.run()

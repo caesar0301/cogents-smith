@@ -9,12 +9,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from cogents_tools.integrations.bu import Agent, ChatOpenAI
+from cogents_tools.integrations.bu import Agent
 from cogents_tools.integrations.bu.agent.views import AgentHistoryList
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
 from cogents_tools.integrations.bu.browser.profile import ViewportSize
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
-llm = ChatOpenAI(model="gpt-4.1-mini")
+llm = get_llm_client_browser_compatible()
 
 
 async def main():

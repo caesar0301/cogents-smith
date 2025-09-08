@@ -45,7 +45,7 @@ load_dotenv()
 from examples.integrations.discord.discord_api import DiscordBot
 
 from cogents_tools.integrations.bu.browser import BrowserProfile
-from cogents_tools.integrations.bu.llm import ChatGoogle
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
 # load credentials from environment variables
 bot_token = os.getenv("DISCORD_BOT_TOKEN")
@@ -56,7 +56,7 @@ api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
     raise ValueError("GOOGLE_API_KEY is not set")
 
-llm = ChatGoogle(model="gemini-2.0-flash-exp", api_key=api_key)
+llm = get_llm_client_browser_compatible()
 
 bot = DiscordBot(
     llm=llm,  # required; instance of BaseChatModel

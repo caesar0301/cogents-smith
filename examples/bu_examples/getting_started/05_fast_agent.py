@@ -23,12 +23,10 @@ Speed optimization instructions:
 
 async def main():
     # 1. Use fast LLM - Llama 4 on Groq for ultra-fast inference
-    from cogents_tools.integrations.bu import ChatGroq
+    from cogents_tools.integrations.utils.llm_adapter import get_llm_client_browser_compatible
 
-    llm = ChatGroq(
-        model="meta-llama/llama-4-maverick-17b-128e-instruct",
-        temperature=0.0,
-    )
+    llm = get_llm_client_browser_compatible()
+
     # from cogents_tools.integrations.bu import ChatGoogle
 
     # llm = ChatGoogle(model='gemini-2.5-flash')
