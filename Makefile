@@ -31,7 +31,7 @@ help: ## Show this help message
 
 install: ## Install development dependencies
 	@echo "$(BLUE)🔧 Installing development dependencies...$(RESET)"
-	@$(POETRY) install --extras all --with dev
+	@$(POETRY) install --with dev,academic,development,multimedia,communication,info-retrieval,memorization,browseruse
 
 setup: install ## Setup development environment
 	@echo "$(GREEN)✅ Development environment ready$(RESET)"
