@@ -1,15 +1,19 @@
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry]
+[project]
 name = "cogents-tools"
 version = "0.1.5"
 description = "Supportive tools for Cogents, towards a cognitive agentic system"
 readme = "README.md"
-license = "MIT"
-authors = ["Xiaming Chen <chenxm35@gmail.com>"]
-maintainers = ["Xiaming Chen <chenxm35@gmail.com>"]
+license = {text = "MIT"}
+authors = [
+    {name = "Xiaming Chen", email = "chenxm35@gmail.com"}
+]
+maintainers = [
+    {name = "Xiaming Chen", email = "chenxm35@gmail.com"}
+]
 keywords = ["agents", "multi-agent system", "cognition", "artificial intelligence"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -21,89 +25,81 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-packages = [{include = "cogents_tools"}]
+requires-python = ">=3.11"
+dependencies = [
+    "cogents-core>=0.1.8.1,<0.2.0",
+    "aiohttp>=3.12.15",
+    "aiofiles>=24.1.0",
+    "anyio>=4.9.0",
+    "httpx>=0.28.1",
+    "psutil>=7.0.0",
+]
 
-[tool.poetry.dependencies]
-# Core required dependencies only
-python = "^3.11"
-cogents-core = "^0.1.8.1,<0.2.0"
-aiohttp = "^3.12.15"
-aiofiles = "^24.1.0"
-anyio = "^4.9.0"
-httpx = "^0.28.1"
-psutil = "^7.0.0"
-
-# === LLM Observability Group ===
-[tool.poetry.group.observability.dependencies]
-opik = "^0.2.0"
-
-# === Academic Research Group ===
-[tool.poetry.group.academic.dependencies]
-arxiv = "^2.2.0"
-
-# === Development Tools Group ===
-[tool.poetry.group.development.dependencies]
-matplotlib = "^3.8.0"
-pexpect = "^4.9.0"
-ipython = "^8.18.0"
-pandas = "^2.0.0"
-
-# === Multimedia Group ===
-[tool.poetry.group.multimedia.dependencies]
-pillow = ">=10.1.0,<12.0"
-pymupdf = "^1.23.0"
-openpyxl = "^3.1.5"
-aliyun-python-sdk-core = "^2.13.1,<3.0.0"
-
-# === Communication Group ===
-[tool.poetry.group.communication.dependencies]
-google-api-python-client = "^2.174.0"
-google-auth-oauthlib = "^1.2.2"
-google-auth = "^2.40.3"
-
-# === Information Retrieval Group ===
-[tool.poetry.group.info-retrieval.dependencies]
-tavily-python = "^0.3.0"
-langchain-tavily = "^0.2.11"
-wikipedia-api = "^0.6.0"
-
-# === Memory/Persistence Group ===
-[tool.poetry.group.memorization.dependencies]
-psycopg2 = "^2.9.10"
-psycopg2-binary = "^2.9.0"
-weaviate-client = "^4.16.9"
-
-# === Browser Use Group ===
-[tool.poetry.group.browseruse.dependencies]
-screeninfo = "^0.8.1"
-uuid7 = "^0.1.0"
-authlib = "^1.6.0"
-anthropic = "^0.58.2,<1.0.0"
-groq = "^0.30.0"
-google-api-core = "^2.25.0"
-google-genai = "^1.29.0,<2.0.0"
-pypdf = "^5.7.0"
-cdp-use = "^1.4.0"
-markdown-pdf = "^1.5"
-html2text = "^2025.4.15"
-
-# === Development Group ===
-[tool.poetry.group.dev.dependencies]
-pytest = ">=8.2,<9"
-pytest-cov = "^4.0.0"
-pytest-asyncio = "^1.1.0"
-pytest-tornasync = "^0.6.0.post2"
-pytest-trio = "^0.8.0"
-pytest-twisted = "^1.14.3"
-twisted = "^25.5.0"
-black = "^23.0.0"
-isort = "^5.12.0"
-flake8 = "^7.3.0"
-autoflake = "^2.3.1"
-
-[tool.poetry.urls]
+[project.urls]
 Homepage = "https://github.com/caesar0301/cogents-tools"
 Repository = "https://github.com/caesar0301/cogents-tools"
+
+[project.optional-dependencies]
+integrations = [
+    "opik>=0.2.0",
+    # browser use
+    "screeninfo>=0.8.1",
+    "uuid7>=0.1.0",
+    "authlib>=1.6.0",
+    "pypdf>=5.7.0",
+    "cdp-use>=1.4.0",
+    "markdown-pdf>=1.5",
+    "html2text>=2025.4.15",
+    # search
+    "google-genai>=1.29.0,<2.0.0",
+    "tavily-python>=0.3.0",
+    "langchain-tavily>=0.2.11",
+    # vector store
+    "weaviate-client>=4.16.9",
+    "psycopg2>=2.9.10",
+    "psycopg2-binary>=2.9.0",
+]
+
+tools = [
+    # academic
+    "arxiv>=2.2.0",
+    # development
+    "matplotlib>=3.8.0",
+    "pexpect>=4.9.0",
+    "ipython>=8.18.0",
+    "pandas>=2.0.0",
+    # multimedia
+    "pillow>=10.1.0,<12.0",
+    "pymupdf>=1.23.0",
+    "openpyxl>=3.1.5",
+    "aliyun-python-sdk-core>=2.13.1,<3.0.0",
+    # communication
+    "google-api-python-client>=2.174.0",
+    "google-auth-oauthlib>=1.2.2",
+    "google-auth>=2.40.3",
+    # info retrieval
+    "tavily-python>=0.3.0",
+    "langchain-tavily>=0.2.11",
+    "wikipedia-api>=0.6.0",
+]
+
+dev = [
+    "pytest>=8.2,<9",
+    "pytest-cov>=4.0.0",
+    "pytest-asyncio>=1.1.0",
+    "pytest-tornasync>=0.6.0.post2",
+    "pytest-trio>=0.8.0",
+    "pytest-twisted>=1.14.3",
+    "twisted>=25.5.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=7.3.0",
+    "autoflake>=2.3.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cogents_tools*"]
 
 [tool.black]
 line-length = 120

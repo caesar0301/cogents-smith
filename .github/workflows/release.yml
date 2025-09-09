@@ -1,4 +1,4 @@
-# This workflow will upload a Python Package using Hatch when a release is created
+# This workflow will upload a Python Package using uv when a release is created
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
 
 # This workflow uses actions that are not certified by GitHub.
@@ -26,42 +26,34 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
       with:
-        python-version: '3.12'
-        cache: 'pip'
-    
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y graphviz libgraphviz-dev pkg-config
-    
-    - name: Install Poetry
-      run: |
-        pip install poetry
+        version: "latest"
+
+    - name: Set up Python
+      run: uv python install 3.12
 
     - name: Install dependencies
-      run: |
-        poetry install --with dev
+      run: uv sync --all-extras --dev
     
     - name: Verify version and run checks
       run: |
         # Version verification
-        POETRY_VERSION=$(poetry version -s)
+        PROJECT_VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
         RELEASE_TAG=${GITHUB_REF#refs/tags/}
-        if [[ "$RELEASE_TAG" == "v$POETRY_VERSION"* ]] || [[ "$RELEASE_TAG" == "$POETRY_VERSION"* ]]; then
-          echo "✅ Version match: RELEASE_TAG '$RELEASE_TAG' contains POETRY_VERSION '$POETRY_VERSION'"
+        if [[ "$RELEASE_TAG" == "v$PROJECT_VERSION"* ]] || [[ "$RELEASE_TAG" == "$PROJECT_VERSION"* ]]; then
+          echo "✅ Version match: RELEASE_TAG '$RELEASE_TAG' contains PROJECT_VERSION '$PROJECT_VERSION'"
         else
-          echo "❌ Version mismatch: RELEASE_TAG '$RELEASE_TAG' should contain POETRY_VERSION '$POETRY_VERSION'"
+          echo "❌ Version mismatch: RELEASE_TAG '$RELEASE_TAG' should contain PROJECT_VERSION '$PROJECT_VERSION'"
           exit 1
         fi
         # Run tests and quality checks
-        make test-unit
+        uv run make test-unit
     
     - name: Build and verify package
       run: |
-        make build
+        uv run make build
         ls -la dist/
         if [ ! -f dist/*.whl ] || [ ! -f dist/*.tar.gz ]; then
           echo "❌ Missing build artifacts"

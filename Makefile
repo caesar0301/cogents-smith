@@ -1,6 +1,6 @@
 # Variables
 PYTHON = python3
-POETRY = poetry
+UV = uv
 PYTEST = pytest
 PYTHON_MODULES = cogents_tools tests examples
 COVERAGE_MODULES = cogents_tools
@@ -31,7 +31,7 @@ help: ## Show this help message
 
 install: ## Install development dependencies
 	@echo "$(BLUE)🔧 Installing development dependencies...$(RESET)"
-	@$(POETRY) install --with dev,academic,development,multimedia,communication,info-retrieval,memorization,browseruse
+	@$(UV) sync --all-extras --dev
 
 setup: install ## Setup development environment
 	@echo "$(GREEN)✅ Development environment ready$(RESET)"
@@ -39,7 +39,7 @@ setup: install ## Setup development environment
 check-env: ## Check environment setup
 	@echo "$(BLUE)🔍 Checking environment...$(RESET)"
 	@echo "Python version: $$($(PYTHON) --version)"
-	@echo "Poetry version: $$($(POETRY) --version)"
+	@echo "uv version: $$($(UV) --version)"
 	@echo "Working directory: $$(pwd)"
 	@echo "Python modules: $(PYTHON_MODULES)"
 
@@ -51,23 +51,23 @@ check-env: ## Check environment setup
 
 test: ## Run all tests.
 	@echo "$(BLUE)🧪 Running all tests...$(RESET)"
-	$(POETRY) run $(PYTEST) $(TEST_DIR) -v
+	$(UV) run $(PYTEST) $(TEST_DIR) -v
 
 test-unit: ## Run unit tests only
 	@echo "$(BLUE)🧪 Running unit tests...$(RESET)"
-	$(POETRY) run $(PYTEST) $(TEST_DIR) -v -m "not integration"
+	$(UV) run $(PYTEST) $(TEST_DIR) -v -m "not integration"
 
 test-integration: ## Run integration tests only
 	@echo "$(BLUE)🧪 Running integration tests...$(RESET)"
-	$(POETRY) run $(PYTEST) $(TEST_DIR) -v -m "integration"
+	$(UV) run $(PYTEST) $(TEST_DIR) -v -m "integration"
 
 test-coverage: ## Run tests with coverage
 	@echo "$(BLUE)🧪 Running tests with coverage...$(RESET)"
-	$(POETRY) run $(PYTEST) $(TEST_DIR) --cov=$(COVERAGE_MODULES) --cov-report=html --cov-report=term-missing
+	$(UV) run $(PYTEST) $(TEST_DIR) --cov=$(COVERAGE_MODULES) --cov-report=html --cov-report=term-missing
 
 test-watch: ## Run tests in watch mode
 	@echo "$(BLUE)👀 Running tests in watch mode...$(RESET)"
-	$(POETRY) run pytest-watch $(TEST_DIR) -- -v
+	$(UV) run pytest-watch $(TEST_DIR) -- -v
 
 # =============================================================================
 # CODE QUALITY COMMANDS
@@ -77,22 +77,22 @@ test-watch: ## Run tests in watch mode
 
 format: ## Format code (black, isort, autoflake)
 	@echo "$(BLUE)🎨 Formatting code...$(RESET)"
-	@$(POETRY) run python -m autoflake --in-place --recursive --remove-all-unused-imports --remove-unused-variables $(PYTHON_MODULES)
-	@$(POETRY) run isort $(PYTHON_MODULES) --line-length $(LINE_LENGTH)
-	@$(POETRY) run black $(PYTHON_MODULES) --line-length $(LINE_LENGTH)
+	@$(UV) run python -m autoflake --in-place --recursive --remove-all-unused-imports --remove-unused-variables $(PYTHON_MODULES)
+	@$(UV) run isort $(PYTHON_MODULES) --line-length $(LINE_LENGTH)
+	@$(UV) run black $(PYTHON_MODULES) --line-length $(LINE_LENGTH)
 
 format-check: ## Check if code is properly formatted
 	@echo "$(BLUE)🔍 Checking code formatting...$(RESET)"
-	@$(POETRY) run black --check $(PYTHON_MODULES) || (echo "$(RED)❌ Code formatting check failed. Run 'make format' to fix.$(RESET)" && exit 1)
-	@$(POETRY) run isort --check-only $(PYTHON_MODULES) || (echo "$(RED)❌ Import sorting check failed. Run 'make format' to fix.$(RESET)" && exit 1)
+	@$(UV) run black --check $(PYTHON_MODULES) || (echo "$(RED)❌ Code formatting check failed. Run 'make format' to fix.$(RESET)" && exit 1)
+	@$(UV) run isort --check-only $(PYTHON_MODULES) || (echo "$(RED)❌ Import sorting check failed. Run 'make format' to fix.$(RESET)" && exit 1)
 
 lint: ## Lint code
 	@echo "$(BLUE)🔍 Running linters...$(RESET)"
-	@$(POETRY) run flake8 --max-line-length=$(LINE_LENGTH) --extend-ignore=E203,W503 $(PYTHON_MODULES)
+	@$(UV) run flake8 --max-line-length=$(LINE_LENGTH) --extend-ignore=E203,W503 $(PYTHON_MODULES)
 
 lint-fix: ## Auto-fix linting issues where possible
 	@echo "$(BLUE)🔧 Auto-fixing linting issues...$(RESET)"
-	@$(POETRY) run python -m autoflake --in-place --recursive --remove-all-unused-imports --remove-unused-variables $(PYTHON_MODULES)
+	@$(UV) run python -m autoflake --in-place --recursive --remove-all-unused-imports --remove-unused-variables $(PYTHON_MODULES)
 
 quality: format-check lint ## Run all quality checks
 	@echo "$(GREEN)🎉 All quality checks passed!$(RESET)"
@@ -107,15 +107,15 @@ autofix: lint-fix format ## Auto-fix all code quality issues
 
 build: ## Build package
 	@echo "$(BLUE)🔨 Building package...$(RESET)"
-	@$(POETRY) build
+	@$(UV) build
 
 build-wheel: ## Build wheel
 	@echo "$(BLUE)🔨 Building wheel...$(RESET)"
-	@$(POETRY) build --format wheel
+	@$(UV) build --wheel
 
 build-sdist: ## Build source distribution
 	@echo "$(BLUE)🔨 Building source distribution...$(RESET)"
-	@$(POETRY) build --format sdist
+	@$(UV) build --sdist
 
 package: clean build ## Build and package for distribution
 
@@ -150,12 +150,12 @@ clean-all: clean ## Clean everything including dependencies
 
 shell: ## Activate development shell
 	@echo "$(BLUE)🐚 Activating development shell...$(RESET)"
-	@$(POETRY) shell
+	@$(UV) shell
 
 requirements: ## Generate requirements files
 	@echo "$(BLUE)📋 Generating requirements files...$(RESET)"
-	@$(POETRY) export -f requirements.txt --output requirements.txt --without-hashes
-	@$(POETRY) export -f requirements.txt --output requirements-prod.txt --without-hashes --only main
+	@$(UV) export --format requirements-txt --output-file requirements.txt --all-extras
+	@$(UV) export --format requirements-txt --output-file requirements-prod.txt
 
 version: ## Show current version
 	@echo "$(BLUE)Current version:$(RESET)"
@@ -199,33 +199,32 @@ release: clean build ## Build all release artifacts
 
 publish: check-publish-prereqs ## Publish package to PyPI
 	@echo "$(BLUE)📦 Publishing to PyPI...$(RESET)"
-	@$(POETRY) publish --build
+	@$(UV) publish
 	@echo "$(GREEN)✅ Package published to PyPI$(RESET)"
 
 publish-test: check-publish-prereqs ## Publish package to TestPyPI
 	@echo "$(BLUE)📦 Publishing to TestPyPI...$(RESET)"
-	@$(POETRY) publish --repository testpypi --build
+	@$(UV) publish --repository testpypi
 	@echo "$(GREEN)✅ Package published to TestPyPI$(RESET)"
 
 check-publish-prereqs: ## Check prerequisites for publishing
 	@echo "$(BLUE)🔍 Checking publishing prerequisites...$(RESET)"
-	@$(POETRY) --version >/dev/null 2>&1 || (echo "$(RED)❌ Poetry not found. Install with: pip install poetry$(RESET)" && exit 1)
-	@if [ -z "$${POETRY_PYPI_TOKEN_PYPI}" ] && [ -z "$${POETRY_PYPI_TOKEN_TESTPYPI}" ] && [ ! -f ~/.pypirc ]; then \
-		echo "$(YELLOW)⚠️  PyPI credentials not found. Set POETRY_PYPI_TOKEN_PYPI or configure ~/.pypirc$(RESET)"; \
+	@$(UV) --version >/dev/null 2>&1 || (echo "$(RED)❌ uv not found. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh$(RESET)" && exit 1)
+	@if [ -z "$${UV_PUBLISH_TOKEN}" ] && [ -z "$${PYPI_TOKEN}" ] && [ ! -f ~/.pypirc ]; then \
+		echo "$(YELLOW)⚠️  PyPI credentials not found. Set UV_PUBLISH_TOKEN or configure ~/.pypirc$(RESET)"; \
 		echo "$(BLUE)💡 You can set credentials with:$(RESET)"; \
-		echo "   export POETRY_PYPI_TOKEN_PYPI=pypi-your_token_here"; \
-		echo "   export POETRY_PYPI_TOKEN_TESTPYPI=pypi-your_test_token_here"; \
+		echo "   export UV_PUBLISH_TOKEN=pypi-your_token_here"; \
 		echo "   OR configure ~/.pypirc file"; \
 		echo "$(BLUE)💡 Get tokens from: https://pypi.org/manage/account/token/$(RESET)"; \
 	fi
 
 test-auth: ## Test PyPI authentication
 	@echo "$(BLUE)🔐 Testing PyPI authentication...$(RESET)"
-	@$(POETRY) config --list | grep pypi || echo "$(YELLOW)No Poetry PyPI config found$(RESET)"
-	@if [ -n "$${POETRY_PYPI_TOKEN_PYPI}" ]; then \
-		echo "$(GREEN)✅ POETRY_PYPI_TOKEN_PYPI is set$(RESET)"; \
+	@$(UV) config list | grep pypi || echo "$(YELLOW)No uv PyPI config found$(RESET)"
+	@if [ -n "$${UV_PUBLISH_TOKEN}" ]; then \
+		echo "$(GREEN)✅ UV_PUBLISH_TOKEN is set$(RESET)"; \
 	else \
-		echo "$(YELLOW)⚠️  POETRY_PYPI_TOKEN_PYPI not set$(RESET)"; \
+		echo "$(YELLOW)⚠️  UV_PUBLISH_TOKEN not set$(RESET)"; \
 	fi
 	@if [ -f ~/.pypirc ]; then \
 		echo "$(GREEN)✅ ~/.pypirc file exists$(RESET)"; \

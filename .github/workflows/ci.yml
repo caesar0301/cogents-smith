@@ -11,35 +11,32 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.11", "3.12"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          version: "latest"
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y graphviz libgraphviz-dev pkg-config
 
-      - name: Install Poetry
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-
       - name: Install dependencies
-        run: make install
+        run: uv sync --all-extras --dev
 
       # - name: Run code quality checks
-      #   run: make quality
+      #   run: uv run make quality
 
       - name: Run unit tests
-        run: make test-unit
+        run: uv run make test-unit
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
