@@ -23,7 +23,7 @@ Environment Setup:
        - Set COGENTS_LLM_PROVIDER=openai
 
 Usage:
-    poetry run python examples/memory/memu_memory_store_example.py
+    python examples/memory/memu_memory_store_example.py
 """
 
 import asyncio
