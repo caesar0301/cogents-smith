@@ -35,8 +35,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/caesar0301/cogents-tools"
-Repository = "https://github.com/caesar0301/cogents-tools"
+Homepage = "https://github.com/mirasurf/cogents-tools"
+Repository = "https://github.com/mirasurf/cogents-tools"
 
 [project.optional-dependencies]
 integrations = [
