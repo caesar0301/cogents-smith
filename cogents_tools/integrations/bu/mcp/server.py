@@ -32,6 +32,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+
 try:
     import psutil
 
@@ -79,8 +81,8 @@ from cogents_tools.integrations.bu import ActionModel, Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
 from cogents_tools.integrations.bu.config import get_default_llm, get_default_profile, load_browser_use_config
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
-from cogents_tools.integrations.bu.llm.openai.chat import ChatOpenAI
 from cogents_tools.integrations.bu.tools.service import Tools
+from cogents_tools.integrations.utils.llm_adapter import BaseChatModel
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +186,7 @@ class BrowserUseServer:
         self.agent: Agent | None = None
         self.browser_session: BrowserSession | None = None
         self.tools: Tools | None = None
-        self.llm: ChatOpenAI | None = None
+        self.llm: BaseChatModel | None = None
         self.file_system: FileSystem | None = None
         self._start_time = time.time()
 
@@ -485,7 +487,7 @@ class BrowserUseServer:
         # Initialize LLM from config
         llm_config = get_default_llm(self.config)
         if api_key := llm_config.get("api_key"):
-            self.llm = ChatOpenAI(
+            self.llm = BaseChatModel(
                 model=llm_config.get("model", "gpt-4o-mini"),
                 api_key=api_key,
                 temperature=llm_config.get("temperature", 0.7),
@@ -509,23 +511,7 @@ class BrowserUseServer:
         """Run an autonomous agent task."""
         logger.debug(f"Running agent task: {task}")
 
-        # Get LLM config
-        llm_config = get_default_llm(self.config)
-        api_key = llm_config.get("api_key") or os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            return "Error: OPENAI_API_KEY not set in config or environment"
-
-        # Override model if provided in tool call
-        if model != llm_config.get("model", "gpt-4o"):
-            llm_model = model
-        else:
-            llm_model = llm_config.get("model", "gpt-4o")
-
-        llm = ChatOpenAI(
-            model=llm_model,
-            api_key=api_key,
-            temperature=llm_config.get("temperature", 0.7),
-        )
+        llm = get_llm_client_bu_compatible()
 
         # Get profile config and merge with tool parameters
         profile_config = get_default_profile(self.config)

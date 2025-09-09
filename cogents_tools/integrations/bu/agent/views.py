@@ -22,13 +22,13 @@ from cogents_tools.integrations.bu.dom.views import DEFAULT_INCLUDE_ATTRIBUTES, 
 # )
 # from cogents_tools.integrations.bu.dom.views import SelectorMap
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystemState
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
-from cogents_tools.integrations.bu.tokens.views import UsageSummary
 from cogents_tools.integrations.bu.tools.registry.views import ActionModel
 
 
 class AgentSettings(BaseModel):
     """Configuration options for the Agent"""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     use_vision: bool = True
     vision_detail_level: Literal["auto", "low", "high"] = "auto"
@@ -46,7 +46,7 @@ class AgentSettings(BaseModel):
     )
     max_history_items: int | None = None
 
-    page_extraction_llm: BaseChatModel | None = None
+    page_extraction_llm: Any | None = None  # BaseChatModel | None (using Any for Pydantic compatibility)
     calculate_cost: bool = False
     include_tool_call_examples: bool = False
     llm_timeout: int = 60  # Timeout in seconds for LLM calls
@@ -301,7 +301,6 @@ class AgentHistoryList(BaseModel, Generic[AgentStructuredOutput]):
     """List of AgentHistory messages, i.e. the history of the agent's actions and thoughts."""
 
     history: list[AgentHistory]
-    usage: UsageSummary | None = None
 
     _output_model_schema: type[AgentStructuredOutput] | None = None
 

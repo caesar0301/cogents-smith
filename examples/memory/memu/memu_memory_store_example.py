@@ -38,7 +38,7 @@ from cogents_core.memory.models import MemoryFilter, MemoryItem
 from cogents_core.utils.logging import get_logger
 
 from cogents_tools.integrations.memory import MemuMemoryStore
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memory_compatible
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memu_compatible
 
 logger = get_logger(__name__)
 
@@ -57,7 +57,7 @@ async def main():
             memory_dir="/tmp/memu_store_example_storage",
             agent_id="memu_example_agent",
             user_id="example_user",
-            llm_client=get_llm_client_memory_compatible(),
+            llm_client=get_llm_client_memu_compatible(),
             enable_embeddings=True,
         )
 

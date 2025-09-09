@@ -14,15 +14,14 @@ from typing import Any, Generic, Literal, TypeVar
 from dotenv import load_dotenv
 
 from cogents_tools.integrations.bu.agent.message_manager.utils import save_conversation
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
-from cogents_tools.integrations.bu.llm.messages import (
+from cogents_tools.integrations.utils.llm_adapter import (
+    BaseChatModel,
     BaseMessage,
-    ContentPartImageParam,
-    ContentPartTextParam,
+    ContentImage,
+    ContentText,
     UserMessage,
+    get_llm_client_bu_compatible,
 )
-from cogents_tools.integrations.bu.llm.openai.chat import ChatOpenAI
-from cogents_tools.integrations.bu.tokens.service import TokenCost
 
 load_dotenv()
 
@@ -51,7 +50,6 @@ from cogents_tools.integrations.bu.agent.views import (
 )
 from cogents_tools.integrations.bu.browser.session import DEFAULT_BROWSER_PROFILE
 from cogents_tools.integrations.bu.browser.views import BrowserStateSummary
-from cogents_tools.integrations.bu.config import CONFIG
 from cogents_tools.integrations.bu.dom.views import DOMInteractedElement
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
 from cogents_tools.integrations.bu.observability import observe, observe_debug
@@ -168,25 +166,11 @@ class Agent(Generic[Context, AgentStructuredOutput]):
         step_timeout: int = 120,
         directly_open_url: bool = True,
         include_recent_events: bool = False,
-        sample_images: list[ContentPartTextParam | ContentPartImageParam] | None = None,
+        sample_images: list[ContentText | ContentImage] | None = None,
         **kwargs,
     ):
         if llm is None:
-            default_llm_name = CONFIG.DEFAULT_LLM
-            if default_llm_name:
-                try:
-                    from cogents_tools.integrations.bu.llm.models import get_llm_by_name
-
-                    llm = get_llm_by_name(default_llm_name)
-                except (ImportError, ValueError) as e:
-                    # Use the logger that's already imported at the top of the module
-                    logger.warning(
-                        f'Failed to create default LLM "{default_llm_name}": {e}. Falling back to ChatOpenAI(model="gpt-4.1-mini")'
-                    )
-                    llm = ChatOpenAI(model="gpt-4.1-mini")
-            else:
-                # No default LLM specified, use the original default
-                llm = ChatOpenAI(model="gpt-4.1-mini")
+            llm = get_llm_client_bu_compatible()
 
         if page_extraction_llm is None:
             page_extraction_llm = llm
@@ -256,16 +240,11 @@ class Agent(Generic[Context, AgentStructuredOutput]):
             step_timeout=step_timeout,
         )
 
-        # Token cost service
-        self.token_cost_service = TokenCost(include_cost=calculate_cost)
-        self.token_cost_service.register_llm(llm)
-        self.token_cost_service.register_llm(page_extraction_llm)
-
         # Initialize state
         self.state = injected_agent_state or AgentState()
 
         # Initialize history
-        self.history = AgentHistoryList(history=[], usage=None)
+        self.history = AgentHistoryList(history=[])
 
         # Initialize agent directory
         import time
@@ -1067,8 +1046,6 @@ class Agent(Generic[Context, AgentStructuredOutput]):
     def _log_agent_event(self, max_steps: int, agent_run_error: str | None = None) -> None:
         """Log the agent event for this run"""
 
-        self.token_cost_service.get_usage_tokens_for_model(self.llm.model)
-
         # Prepare action_history data correctly
         action_history_data = []
         for item in self.history.history:
@@ -1300,9 +1277,6 @@ class Agent(Generic[Context, AgentStructuredOutput]):
 
                 self.logger.info(f"❌ {agent_run_error}")
 
-            self.logger.debug("📊 Collecting usage summary...")
-            self.history.usage = await self.token_cost_service.get_usage_summary()
-
             # set the model output schema and call it on the fly
             if self.history._output_model_schema is None and self.output_model_schema is not None:
                 self.history._output_model_schema = self.output_model_schema
@@ -1315,8 +1289,6 @@ class Agent(Generic[Context, AgentStructuredOutput]):
             self.logger.debug("Got KeyboardInterrupt during execution, returning current history")
             agent_run_error = "KeyboardInterrupt"
 
-            self.history.usage = await self.token_cost_service.get_usage_summary()
-
             return self.history
 
         except Exception as e:
@@ -1325,9 +1297,6 @@ class Agent(Generic[Context, AgentStructuredOutput]):
             raise e
 
         finally:
-            # Log token usage summary
-            await self.token_cost_service.log_usage_summary()
-
             # Unregister signal handlers before cleanup
             signal_handler.unregister()
 
@@ -1820,7 +1789,6 @@ class Agent(Generic[Context, AgentStructuredOutput]):
         action_history = self.history.action_history()
         action_errors = self.history.errors()
         urls = self.history.urls()
-        usage = self.history.usage
 
         return {
             "trace": {
@@ -1851,7 +1819,6 @@ class Agent(Generic[Context, AgentStructuredOutput]):
                 "self_report_success": 1 if self.history.is_successful() else 0,
                 "duration": self.history.total_duration_seconds(),
                 "steps_taken": self.history.number_of_steps(),
-                "usage": json.dumps(usage.model_dump()) if usage else None,
             },
             "trace_details": {
                 # Autogenerated fields (ensure same as trace)

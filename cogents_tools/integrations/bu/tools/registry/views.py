@@ -5,7 +5,6 @@ from pydantic import BaseModel, ConfigDict
 
 from cogents_tools.integrations.bu.browser import BrowserSession
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
 
 if TYPE_CHECKING:
     pass
@@ -150,7 +149,7 @@ class SpecialActionParameters(BaseModel):
     cdp_client: Any | None = None  # CDPClient type from cdp_use
 
     # extra injected config if the action asks for these arg names
-    page_extraction_llm: BaseChatModel | None = None
+    page_extraction_llm: Any | None = None  # BaseChatModel | None (using Any for Pydantic compatibility)
     file_system: FileSystem | None = None
     available_file_paths: list[str] | None = None
     has_sensitive_data: bool = False

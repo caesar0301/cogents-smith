@@ -102,9 +102,9 @@ def create_embedding_client(llm_client: "BaseLLMClient") -> EmbeddingClient:
         EmbeddingClient instance
 
     Example:
-        from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memory_compatible
+        from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memu_compatible
 
-        llm_client = get_llm_client_memory_compatible()
+        llm_client = get_llm_client_memu_compatible()
         embedding_client = create_embedding_client(llm_client)
     """
     return EmbeddingClient(llm_client)
@@ -122,9 +122,9 @@ def get_default_embedding_client() -> Optional[EmbeddingClient]:
     """
     try:
         # Import here to avoid circular imports
-        from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memory_compatible
+        from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memu_compatible
 
-        llm_client = get_llm_client_memory_compatible()
+        llm_client = get_llm_client_memu_compatible()
         if llm_client is None:
             logger.warning("Failed to create LLM client from environment")
             return None

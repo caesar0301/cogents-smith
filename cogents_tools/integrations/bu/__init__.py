@@ -52,13 +52,6 @@ if TYPE_CHECKING:
     from cogents_tools.integrations.bu.browser import BrowserSession
     from cogents_tools.integrations.bu.browser import BrowserSession as Browser
     from cogents_tools.integrations.bu.dom.service import DomService
-    from cogents_tools.integrations.bu.llm import models
-    from cogents_tools.integrations.bu.llm.anthropic.chat import ChatAnthropic
-    from cogents_tools.integrations.bu.llm.azure.chat import ChatAzureOpenAI
-    from cogents_tools.integrations.bu.llm.google.chat import ChatGoogle
-    from cogents_tools.integrations.bu.llm.groq.chat import ChatGroq
-    from cogents_tools.integrations.bu.llm.ollama.chat import ChatOllama
-    from cogents_tools.integrations.bu.llm.openai.chat import ChatOpenAI
     from cogents_tools.integrations.bu.tools.service import Controller, Tools
 
 
@@ -80,15 +73,6 @@ _LAZY_IMPORTS = {
     "Controller": ("cogents_tools.integrations.bu.tools.service", "Controller"),  # alias
     # DOM service (moderate weight)
     "DomService": ("cogents_tools.integrations.bu.dom.service", "DomService"),
-    # Chat models (very heavy imports)
-    "ChatOpenAI": ("cogents_tools.integrations.bu.llm.openai.chat", "ChatOpenAI"),
-    "ChatGoogle": ("cogents_tools.integrations.bu.llm.google.chat", "ChatGoogle"),
-    "ChatAnthropic": ("cogents_tools.integrations.bu.llm.anthropic.chat", "ChatAnthropic"),
-    "ChatGroq": ("cogents_tools.integrations.bu.llm.groq.chat", "ChatGroq"),
-    "ChatAzureOpenAI": ("cogents_tools.integrations.bu.llm.azure.chat", "ChatAzureOpenAI"),
-    "ChatOllama": ("cogents_tools.integrations.bu.llm.ollama.chat", "ChatOllama"),
-    # LLM models module
-    "models": ("cogents_tools.integrations.bu.llm.models", None),
 }
 
 
@@ -125,15 +109,6 @@ __all__ = [
     "ActionResult",
     "ActionModel",
     "AgentHistoryList",
-    # Chat models
-    "ChatOpenAI",
-    "ChatGoogle",
-    "ChatAnthropic",
-    "ChatGroq",
-    "ChatAzureOpenAI",
-    "ChatOllama",
     "Tools",
     "Controller",
-    # LLM models module
-    "models",
 ]

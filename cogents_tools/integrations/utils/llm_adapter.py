@@ -1,62 +1,108 @@
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Generic, List, Protocol, TypeVar, Union
+
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
 import dotenv
 from cogents_core.llm import BaseLLMClient, get_llm_client
 
-from cogents_tools.integrations.bu.llm.views import ChatInvokeCompletion
-
 dotenv.load_dotenv()
 
+################################################################################
+# Browser-use compatibility
+################################################################################
 
-def get_llm_client_browser_compatible(structured_output=True, **kwargs) -> BaseLLMClient:
-    """
-    Get an LLM client with optional memory system compatibility
-
-    Args:
-        structured_output: Whether to enable structured output
-
-    Returns:
-        BaseLLMClient: Configured LLM client
-    """
-    return BULLMAdapter(get_llm_client(structured_output=structured_output, **kwargs))
+# Define the TypeVar for generic typing
+T = TypeVar("T")
 
 
-def get_llm_client_memory_compatible(structured_output=True, **kwargs) -> BaseLLMClient:
-    """
-    Get an LLM client with optional memory system compatibility
-
-    Args:
-        structured_output: Whether to enable structured output
-
-    Returns:
-        BaseLLMClient: Configured LLM client
-    """
-    return MemoryLLMAdapter(get_llm_client(structured_output=structured_output, **kwargs))
+class ChatInvokeCompletion(BaseModel, Generic[T]):
+    completion: T
+    thinking: str | None = None
+    redacted_thinking: str | None = None
 
 
-class BaseLLMAdapter:
-    """Base class for LLM adapters providing common interface"""
+class ModelError(Exception):
+    pass
 
-    def __init__(self, llm_client):
-        """Initialize adapter with LLM client"""
+
+class ModelProviderError(ModelError):
+    def __init__(self, message: str, status_code: int = 502, model: str | None = None):
+        super().__init__(message, status_code)
+        self.model = model
+
+
+class ModelRateLimitError(ModelProviderError):
+    def __init__(self, message: str, status_code: int = 429, model: str | None = None):
+        super().__init__(message, status_code, model)
+
+
+# Define message types for compatibility
+from typing import Literal
+
+
+class ContentPartTextParam(BaseModel):
+    text: str
+    type: Literal["text"] = "text"
+
+
+class ContentPartRefusalParam(BaseModel):
+    refusal: str
+    type: Literal["refusal"] = "refusal"
+
+
+class ContentPartImageParam(BaseModel):
+    image_url: Any
+    type: Literal["image_url"] = "image_url"
+
+
+class _MessageBase(BaseModel):
+    role: Literal["user", "system", "assistant"]
+    cache: bool = False
+
+
+class UserMessage(_MessageBase):
+    role: Literal["user"] = "user"
+    content: str | list[ContentPartTextParam | ContentPartImageParam]
+    name: str | None = None
+
+
+class SystemMessage(_MessageBase):
+    role: Literal["system"] = "system"
+    content: str | list[ContentPartTextParam]
+    name: str | None = None
+
+
+class AssistantMessage(_MessageBase):
+    role: Literal["assistant"] = "assistant"
+    content: str | list[ContentPartTextParam | ContentPartRefusalParam] | None
+    name: str | None = None
+    refusal: str | None = None
+    tool_calls: list = []
+
+
+BaseMessage = Union[UserMessage, SystemMessage, AssistantMessage]
+ContentText = ContentPartTextParam
+ContentRefusal = ContentPartRefusalParam
+ContentImage = ContentPartImageParam
+
+
+# Define the BaseChatModel class for compatibility
+class BaseChatModel(Protocol):
+    """Base chat model that adapts cogents LLM clients for browser-use compatibility."""
+
+    def __init__(self, llm_client: BaseLLMClient):
+        """
+        Initialize Base Chat Model
+
+        Args:
+            llm_client: cogents LLM client to adapt
+        """
         self.llm_client = llm_client
-
-        # Forward common attributes
-        for attr_name in ["api_key", "base_url", "chat_model", "embed_model"]:
-            if hasattr(llm_client, attr_name):
-                setattr(self, attr_name, getattr(llm_client, attr_name))
-
-    def completion(self, messages: List[Dict[str, str]], **kwargs) -> Any:
-        """Forward completion calls to original client"""
-        return self.llm_client.completion(messages, **kwargs)
-
-    def structured_completion(self, messages: List[Dict[str, str]], response_model, **kwargs) -> Any:
-        """Forward structured completion calls to original client"""
-        return self.llm_client.structured_completion(messages, response_model, **kwargs)
+        self._verified_api_keys = True  # Assume the cogents client is properly configured
 
     @property
     def provider(self) -> str:
@@ -64,36 +110,23 @@ class BaseLLMAdapter:
         return getattr(self.llm_client, "provider", "unknown")
 
     @property
-    def model(self) -> str:
-        """Return model name"""
-        return getattr(self.llm_client, "chat_model", getattr(self.llm_client, "model", "unknown"))
-
-
-# Adapt cogents llm client to browser-use.
-class BULLMAdapter(BaseLLMAdapter):
-    """Adapter to make cogents LLM clients compatible with browser-use."""
-
-    def __init__(self, llm_client=None):
-        """
-        Initialize Browser-Use LLM Adapter
-
-        Args:
-            llm_client: Optional cogents LLM client. If None, creates a default one.
-        """
-        super().__init__(llm_client)
-        self._verified_api_keys = True  # Assume the cogents client is properly configured
-
-    @property
     def name(self) -> str:
         """Return the model name."""
         return self.model
 
     @property
+    def model(self) -> str:
+        """Return model name"""
+        return self.model_name
+
+    @property
     def model_name(self) -> str:
         """Return the model name for legacy support."""
-        return self.model
+        return getattr(self.llm_client, "chat_model", getattr(self.llm_client, "model", "unknown"))
 
-    async def ainvoke(self, messages: List[Any], output_format: Optional[type] = None, **kwargs) -> Any:
+    async def ainvoke(
+        self, messages: list[BaseMessage], output_format: type[T] | None = None
+    ) -> ChatInvokeCompletion[T] | ChatInvokeCompletion[str]:
         """Invoke the LLM with messages."""
         try:
             # Convert browser-use messages to cogents format
@@ -139,7 +172,7 @@ class BULLMAdapter(BaseLLMAdapter):
                         )
                     else:
                         structured_response = self.llm_client.structured_completion(cogents_messages, output_format)
-                    return ChatInvokeCompletion(completion=structured_response, usage=None)
+                    return ChatInvokeCompletion(completion=structured_response)
                 except Exception as e:
                     logger.error(f"Error in structured completion: {e}")
                     raise
@@ -150,19 +183,24 @@ class BULLMAdapter(BaseLLMAdapter):
                 else:
                     response = self.llm_client.completion(cogents_messages)
 
-                return ChatInvokeCompletion(completion=str(response), usage=None)
+                return ChatInvokeCompletion(completion=str(response))
 
         except Exception as e:
             logger.error(f"Error in LLM adapter: {e}")
             raise
 
 
-class MemoryLLMAdapter(BaseLLMAdapter):
+################################################################################
+# MemU agent compatibility
+################################################################################
+
+
+class MemoryLLMAdapter:
     """Adapter to make cogents LLM clients compatible with memory agent system"""
 
-    def __init__(self, llm_client):
+    def __init__(self, llm_client: BaseLLMClient):
         """Initialize with the original LLM client"""
-        super().__init__(llm_client)
+        self.llm_client = llm_client
 
     def simple_chat(self, message: str) -> str:
         """
@@ -262,9 +300,51 @@ class MemoryLLMAdapter(BaseLLMAdapter):
         return self.llm_client.get_embedding_dimensions()
 
 
+def get_llm_client_bu_compatible(**kwargs) -> BaseChatModel:
+    """
+    Get an LLM client with browser-use compatibility
+
+    Args:
+        **kwargs: Additional arguments to pass to the LLM client
+
+    Returns:
+        BaseChatModel: Configured LLM client adapted for browser-use
+    """
+    return BaseChatModel(get_llm_client(structured_output=True, **kwargs))
+
+
+def get_llm_client_memu_compatible(**kwargs) -> BaseLLMClient:
+    """
+    Get an LLM client with optional MemU system compatibility
+
+    Args:
+        **kwargs: Additional arguments to pass to the LLM client
+
+    Returns:
+        BaseLLMClient: Configured LLM client
+    """
+    return MemoryLLMAdapter(get_llm_client(structured_output=True, **kwargs))
+
+
 __all__ = [
-    "BULLMAdapter",
+    # Adapters
     "MemoryLLMAdapter",
-    "get_llm_client_browser_compatible",
-    "get_llm_client_memory_compatible",
+    "BaseChatModel",
+    # Factory functions
+    "get_llm_client_bu_compatible",
+    "get_llm_client_memu_compatible",
+    # Message types
+    "BaseMessage",
+    "UserMessage",
+    "SystemMessage",
+    "AssistantMessage",
+    "ContentText",
+    "ContentRefusal",
+    "ContentImage",
+    # Views
+    "ChatInvokeCompletion",
+    # Exceptions
+    "ModelError",
+    "ModelProviderError",
+    "ModelRateLimitError",
 ]

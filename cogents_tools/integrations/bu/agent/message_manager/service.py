@@ -8,14 +8,9 @@ from cogents_tools.integrations.bu.agent.prompts import AgentMessagePrompt
 from cogents_tools.integrations.bu.agent.views import ActionResult, AgentOutput, AgentStepInfo, MessageManagerState
 from cogents_tools.integrations.bu.browser.views import BrowserStateSummary
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
-from cogents_tools.integrations.bu.llm.messages import (
-    BaseMessage,
-    ContentPartImageParam,
-    ContentPartTextParam,
-    SystemMessage,
-)
 from cogents_tools.integrations.bu.observability import observe_debug
 from cogents_tools.integrations.bu.utils import match_url_with_domain_pattern, time_execution_sync
+from cogents_tools.integrations.utils.llm_adapter import BaseMessage, ContentImage, ContentText, SystemMessage
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +99,7 @@ class MessageManager:
         vision_detail_level: Literal["auto", "low", "high"] = "auto",
         include_tool_call_examples: bool = False,
         include_recent_events: bool = False,
-        sample_images: list[ContentPartTextParam | ContentPartImageParam] | None = None,
+        sample_images: list[ContentText | ContentImage] | None = None,
     ):
         self.task = task
         self.state = state
@@ -414,7 +409,7 @@ class MessageManager:
             message.content = replace_sensitive(message.content)
         elif isinstance(message.content, list):
             for i, item in enumerate(message.content):
-                if isinstance(item, ContentPartTextParam):
+                if isinstance(item, ContentText):
                     item.text = replace_sensitive(item.text)
                     message.content[i] = item
         return message

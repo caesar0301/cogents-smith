@@ -1,14 +1,20 @@
 import importlib.resources
 from datetime import datetime
+
+# Define ImageURL for compatibility
 from typing import TYPE_CHECKING, Literal, Optional
 
-from cogents_tools.integrations.bu.llm.messages import (
-    ContentPartImageParam,
-    ContentPartTextParam,
-    ImageURL,
-    SystemMessage,
-    UserMessage,
-)
+from pydantic import BaseModel
+
+from cogents_tools.integrations.utils.llm_adapter import ContentImage, ContentText, SystemMessage, UserMessage
+
+
+class ImageURL(BaseModel):
+    url: str
+    detail: Literal["auto", "low", "high"] = "auto"
+    media_type: Literal["image/jpeg", "image/png", "image/gif", "image/webp"] = "image/png"
+
+
 from cogents_tools.integrations.bu.observability import observe_debug
 from cogents_tools.integrations.bu.utils import is_new_tab_page
 
@@ -101,7 +107,7 @@ class AgentMessagePrompt:
         screenshots: list[str] | None = None,
         vision_detail_level: Literal["auto", "low", "high"] = "auto",
         include_recent_events: bool = False,
-        sample_images: list[ContentPartTextParam | ContentPartImageParam] | None = None,
+        sample_images: list[ContentText | ContentImage] | None = None,
     ):
         self.browser_state: "BrowserStateSummary" = browser_state_summary
         self.file_system: "FileSystem | None" = file_system
@@ -279,9 +285,7 @@ Available tabs:
 
         if use_vision is True and self.screenshots:
             # Start with text description
-            content_parts: list[ContentPartTextParam | ContentPartImageParam] = [
-                ContentPartTextParam(text=state_description)
-            ]
+            content_parts: list[ContentText | ContentImage] = [ContentText(text=state_description)]
 
             # Add sample images
             content_parts.extend(self.sample_images)
@@ -295,11 +299,11 @@ Available tabs:
                     label = "Previous screenshot:"
 
                 # Add label as text content
-                content_parts.append(ContentPartTextParam(text=label))
+                content_parts.append(ContentText(text=label))
 
                 # Add the screenshot
                 content_parts.append(
-                    ContentPartImageParam(
+                    ContentImage(
                         image_url=ImageURL(
                             url=f"data:image/png;base64,{screenshot}",
                             media_type="image/png",

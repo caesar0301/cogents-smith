@@ -17,7 +17,7 @@ from cogents_core.memory.base import BaseMemoryStore
 from cogents_core.memory.models import MemoryFilter, MemoryItem, MemoryStats, SearchResult
 
 from cogents_tools.integrations.memory.memu import MemoryAgent
-from cogents_tools.integrations.utils.llm_adapter import BaseLLMClient, get_llm_client_memory_compatible
+from cogents_tools.integrations.utils.llm_adapter import BaseLLMClient, get_llm_client_memu_compatible
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ class MemuMemoryStore(BaseMemoryStore):
         # Initialize LLM client if not provided
         if llm_client is None:
             try:
-                llm_client = get_llm_client_memory_compatible()
+                llm_client = get_llm_client_memu_compatible()
             except Exception as e:
                 logger.warning(f"Failed to initialize default LLM client: {e}")
                 # Continue without LLM client for basic file operations

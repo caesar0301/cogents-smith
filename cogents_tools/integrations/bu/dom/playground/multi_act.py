@@ -1,12 +1,10 @@
 from cogents_tools.integrations.bu import Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
 from cogents_tools.integrations.bu.browser.types import ViewportSize
-from cogents_tools.integrations.bu.llm import ChatAzureOpenAI
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
 
 # Initialize the Azure OpenAI client
-llm = ChatAzureOpenAI(
-    model="gpt-4.1-mini",
-)
+llm = get_llm_client_bu_compatible()
 
 
 TASK = """

@@ -29,8 +29,6 @@ from cogents_tools.integrations.bu.browser.events import (
 from cogents_tools.integrations.bu.browser.views import BrowserError
 from cogents_tools.integrations.bu.dom.service import EnhancedDOMTreeNode
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
-from cogents_tools.integrations.bu.llm.base import BaseChatModel
-from cogents_tools.integrations.bu.llm.messages import SystemMessage, UserMessage
 from cogents_tools.integrations.bu.observability import observe_debug
 from cogents_tools.integrations.bu.tools.registry.service import Registry
 from cogents_tools.integrations.bu.tools.views import (
@@ -50,6 +48,7 @@ from cogents_tools.integrations.bu.tools.views import (
     UploadFileAction,
 )
 from cogents_tools.integrations.bu.utils import _log_pretty_url, time_execution_sync
+from cogents_tools.integrations.utils.llm_adapter import BaseChatModel, SystemMessage, UserMessage
 
 logger = logging.getLogger(__name__)
 
