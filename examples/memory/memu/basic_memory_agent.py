@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from cogents_core.utils.logging import get_logger
 
 from cogents_tools.integrations.memory.memu import MemoryAgent
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memory_compatible
+from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memu_compatible
 
 logger = get_logger(__name__)
 
@@ -36,7 +36,7 @@ def main():
     try:
         # Initialize LLM client (required for memory operations)
         print("1. Initializing LLM client...")
-        llm_client = get_llm_client_memory_compatible()
+        llm_client = get_llm_client_memu_compatible()
         getattr(llm_client.llm_client, "chat_model", "unknown model")
         type(llm_client.llm_client).__name__
 

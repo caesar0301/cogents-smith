@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from cogents_tools.integrations.llm import BaseMessage
+from cogents_tools.integrations.utils.llm_adapter import BaseMessage
 
 if TYPE_CHECKING:
     pass

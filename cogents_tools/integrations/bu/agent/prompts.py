@@ -1,21 +1,20 @@
 import importlib.resources
 from datetime import datetime
+
+# Define ImageURL for compatibility
 from typing import TYPE_CHECKING, Literal, Optional
 
-from cogents_tools.integrations.llm import (
-    ContentImage,
-    ContentText,
-    SystemMessage,
-    UserMessage,
-)
-# Define ImageURL for compatibility
-from typing import Literal
 from pydantic import BaseModel
+
+from cogents_tools.integrations.utils.llm_adapter import ContentImage, ContentText, SystemMessage, UserMessage
+
 
 class ImageURL(BaseModel):
     url: str
     detail: Literal["auto", "low", "high"] = "auto"
     media_type: Literal["image/jpeg", "image/png", "image/gif", "image/webp"] = "image/png"
+
+
 from cogents_tools.integrations.bu.observability import observe_debug
 from cogents_tools.integrations.bu.utils import is_new_tab_page
 
@@ -286,9 +285,7 @@ Available tabs:
 
         if use_vision is True and self.screenshots:
             # Start with text description
-            content_parts: list[ContentText | ContentImage] = [
-                ContentText(text=state_description)
-            ]
+            content_parts: list[ContentText | ContentImage] = [ContentText(text=state_description)]
 
             # Add sample images
             content_parts.extend(self.sample_images)
