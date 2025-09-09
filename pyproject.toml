@@ -7,7 +7,7 @@ name = "cogents-tools"
 version = "0.1.5"
 description = "Supportive tools for Cogents, towards a cognitive agentic system"
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "Xiaming Chen", email = "chenxm35@gmail.com"}
 ]
@@ -18,7 +18,6 @@ keywords = ["agents", "multi-agent system", "cognition", "artificial intelligenc
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
