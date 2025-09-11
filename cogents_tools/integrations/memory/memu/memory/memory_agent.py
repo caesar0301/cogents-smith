@@ -13,8 +13,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 
+from cogents_tools.integrations.llm import BaseLLMClient
 from cogents_tools.integrations.memory.memu.config.markdown_config import get_config_manager
-from cogents_tools.integrations.utils.llm_adapter import BaseLLMClient
 
 from .actions import ACTION_REGISTRY
 from .embeddings import create_embedding_client

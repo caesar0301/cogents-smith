@@ -20,8 +20,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from cogents_core.utils.logging import get_logger
 
+from cogents_tools.integrations.llm import get_llm_client_memu_compatible
 from cogents_tools.integrations.memory.memu import MemoryAgent
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memu_compatible
 
 logger = get_logger(__name__)
 

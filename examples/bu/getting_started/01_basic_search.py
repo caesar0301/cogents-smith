@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from cogents_tools.integrations.bu import Agent
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 
 async def main():

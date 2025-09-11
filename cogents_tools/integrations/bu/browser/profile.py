@@ -696,9 +696,7 @@ class BrowserProfile(BrowserConnectArgs, BrowserLaunchPersistentContextArgs, Bro
             alternate_name = (
                 Path(self.executable_path).name.lower().replace(" ", "-")
                 if self.executable_path
-                else self.channel.name.lower()
-                if self.channel
-                else "None"
+                else self.channel.name.lower() if self.channel else "None"
             )
             logger.warning(
                 f"⚠️ {self} Changing user_data_dir= {_log_pretty_path(self.user_data_dir)} ➡️ .../default-{alternate_name} to avoid {alternate_name.upper()} corruping default profile created by {BROWSERUSE_DEFAULT_CHANNEL.name}"

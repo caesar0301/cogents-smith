@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
+from cogents_tools.integrations.embedgen import EmbeddingGenerator
 from cogents_tools.integrations.search import BaseSearch, SearchResult, TavilySearchWrapper
-from cogents_tools.integrations.utils.embedgen import EmbeddingGenerator
 from cogents_tools.integrations.vector_store import BaseVectorStore, get_vector_store
 
 from .docproc import ChunkingConfig, DocumentProcessor
@@ -501,9 +501,9 @@ class SemanticSearch:
                     "source_url": chunk.source_url or "",
                     "source_title": chunk.source_title or "",
                     "chunk_index": chunk.chunk_index,
-                    "timestamp": chunk.timestamp.isoformat()
-                    if chunk.timestamp
-                    else datetime.now(timezone.utc).isoformat(),
+                    "timestamp": (
+                        chunk.timestamp.isoformat() if chunk.timestamp else datetime.now(timezone.utc).isoformat()
+                    ),
                     "metadata": json.dumps(chunk.metadata) if chunk.metadata else "{}",
                     "data": chunk.content,  # Required by BaseVectorStore schema
                     "category": "document_chunk",  # Default category

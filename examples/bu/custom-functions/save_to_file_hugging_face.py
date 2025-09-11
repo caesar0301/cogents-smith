@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from cogents_tools.integrations.bu.agent.service import Agent
 from cogents_tools.integrations.bu.tools.service import Tools
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 # Initialize tools first
 tools = Tools()

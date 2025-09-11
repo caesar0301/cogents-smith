@@ -23,7 +23,7 @@ Speed optimization instructions:
 
 async def main():
     # 1. Use fast LLM - Llama 4 on Groq for ultra-fast inference
-    from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+    from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
     llm = get_llm_client_bu_compatible()
 

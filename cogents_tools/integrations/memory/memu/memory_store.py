@@ -16,8 +16,8 @@ from typing import Any, Dict, List, Optional
 from cogents_core.memory.base import BaseMemoryStore
 from cogents_core.memory.models import MemoryFilter, MemoryItem, MemoryStats, SearchResult
 
+from cogents_tools.integrations.llm import BaseLLMClient, get_llm_client_memu_compatible
 from cogents_tools.integrations.memory.memu import MemoryAgent
-from cogents_tools.integrations.utils.llm_adapter import BaseLLMClient, get_llm_client_memu_compatible
 
 logger = logging.getLogger(__name__)
 

@@ -57,9 +57,11 @@ class Reflection:
             # Fallback when no LLM available
             missing_slots = [s.name for s in self.missing_slots(state)]
             return KnowledgeGapAnalysis(
-                knowledge_gap_summary=f"Missing slots: {', '.join(missing_slots)}"
-                if missing_slots
-                else "All required information collected",
+                knowledge_gap_summary=(
+                    f"Missing slots: {', '.join(missing_slots)}"
+                    if missing_slots
+                    else "All required information collected"
+                ),
                 critical_missing_info=missing_slots,
                 suggested_next_topics=missing_slots[:5] if missing_slots else [],
                 readiness_to_proceed=0.0 if missing_slots else 1.0,
@@ -122,9 +124,11 @@ class Reflection:
             # Fallback to basic analysis
             missing_slots = [s.name for s in self.missing_slots(state)]
             return KnowledgeGapAnalysis(
-                knowledge_gap_summary=f"Error in analysis. Missing slots: {', '.join(missing_slots)}"
-                if missing_slots
-                else "Analysis error but all slots filled",
+                knowledge_gap_summary=(
+                    f"Error in analysis. Missing slots: {', '.join(missing_slots)}"
+                    if missing_slots
+                    else "Analysis error but all slots filled"
+                ),
                 critical_missing_info=missing_slots,
                 suggested_next_topics=missing_slots[:5] if missing_slots else [],
                 readiness_to_proceed=0.0 if missing_slots else 0.5,

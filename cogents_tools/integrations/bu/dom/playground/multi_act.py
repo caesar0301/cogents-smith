@@ -1,7 +1,7 @@
 from cogents_tools.integrations.bu import Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
 from cogents_tools.integrations.bu.browser.types import ViewportSize
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 # Initialize the Azure OpenAI client
 llm = get_llm_client_bu_compatible()

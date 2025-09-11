@@ -84,9 +84,10 @@ class TestBashToolkitBuildAndCleanup:
     @pytest.mark.asyncio
     async def test_build_initializes_shell(self):
         """Test that build() initializes the shell."""
-        with patch.object(BashToolkit, "_initialize_shell") as mock_init, patch.object(
-            BashToolkit, "_setup_workspace"
-        ) as mock_setup:
+        with (
+            patch.object(BashToolkit, "_initialize_shell") as mock_init,
+            patch.object(BashToolkit, "_setup_workspace") as mock_setup,
+        ):
             toolkit = BashToolkit()
             await toolkit.build()
 
@@ -97,9 +98,10 @@ class TestBashToolkitBuildAndCleanup:
     @pytest.mark.asyncio
     async def test_build_idempotent(self):
         """Test that multiple build() calls are idempotent."""
-        with patch.object(BashToolkit, "_initialize_shell") as mock_init, patch.object(
-            BashToolkit, "_setup_workspace"
-        ) as mock_setup:
+        with (
+            patch.object(BashToolkit, "_initialize_shell") as mock_init,
+            patch.object(BashToolkit, "_setup_workspace") as mock_setup,
+        ):
             toolkit = BashToolkit()
             await toolkit.build()
             await toolkit.build()  # Second call
@@ -333,14 +335,14 @@ class TestBashToolkitCommandExecution:
 
         # Mock child with ANSI sequences
         mock_child = Mock()
-        mock_child.before = "\x1B[31mred text\x1B[0m\r\n"
+        mock_child.before = "\x1b[31mred text\x1b[0m\r\n"
         toolkit.child = mock_child
         toolkit.custom_prompt = "TEST_PROMPT>> "
 
         result = toolkit._run_command_internal("echo test")
 
         # ANSI sequences should be removed
-        assert "\x1B" not in result
+        assert "\x1b" not in result
         assert result == "red text"
 
     def test_run_command_internal_carriage_return_removal(self):
@@ -361,9 +363,11 @@ class TestBashToolkitCommandExecution:
         """Test successful bash command execution."""
         toolkit = BashToolkit()
 
-        with patch.object(toolkit, "_validate_command", return_value=None), patch.object(
-            toolkit, "_run_command_internal", return_value="test output"
-        ) as mock_run, patch.object(toolkit, "build"):
+        with (
+            patch.object(toolkit, "_validate_command", return_value=None),
+            patch.object(toolkit, "_run_command_internal", return_value="test output") as mock_run,
+            patch.object(toolkit, "build"),
+        ):
             toolkit._shell_initialized = True
 
             result = await toolkit.run_bash("echo test")
@@ -386,9 +390,11 @@ class TestBashToolkitCommandExecution:
         """Test bash command execution initializes shell if needed."""
         toolkit = BashToolkit()
 
-        with patch.object(toolkit, "_validate_command", return_value=None), patch.object(
-            toolkit, "_run_command_internal", return_value="output"
-        ), patch.object(toolkit, "build") as mock_build:
+        with (
+            patch.object(toolkit, "_validate_command", return_value=None),
+            patch.object(toolkit, "_run_command_internal", return_value="output"),
+            patch.object(toolkit, "build") as mock_build,
+        ):
             toolkit._shell_initialized = False
 
             await toolkit.run_bash("echo test")
@@ -403,8 +409,9 @@ class TestBashToolkitCommandExecution:
 
         long_output = "a" * 20
 
-        with patch.object(toolkit, "_validate_command", return_value=None), patch.object(
-            toolkit, "_run_command_internal", return_value=long_output
+        with (
+            patch.object(toolkit, "_validate_command", return_value=None),
+            patch.object(toolkit, "_run_command_internal", return_value=long_output),
         ):
             toolkit._shell_initialized = True
 
@@ -419,9 +426,11 @@ class TestBashToolkitCommandExecution:
         """Test shell recovery on unresponsive shell."""
         toolkit = BashToolkit()
 
-        with patch.object(toolkit, "_validate_command", return_value=None), patch.object(
-            toolkit, "_run_command_internal"
-        ) as mock_run, patch.object(toolkit, "_recover_shell") as mock_recover:
+        with (
+            patch.object(toolkit, "_validate_command", return_value=None),
+            patch.object(toolkit, "_run_command_internal") as mock_run,
+            patch.object(toolkit, "_recover_shell") as mock_recover,
+        ):
             toolkit._shell_initialized = True
 
             # First call (test) fails, second call (actual command) succeeds
@@ -437,9 +446,11 @@ class TestBashToolkitCommandExecution:
         """Test bash command execution with error."""
         toolkit = BashToolkit()
 
-        with patch.object(toolkit, "_validate_command", return_value=None), patch.object(
-            toolkit, "_run_command_internal", side_effect=Exception("Execution failed")
-        ), patch.object(toolkit, "_recover_shell") as mock_recover:
+        with (
+            patch.object(toolkit, "_validate_command", return_value=None),
+            patch.object(toolkit, "_run_command_internal", side_effect=Exception("Execution failed")),
+            patch.object(toolkit, "_recover_shell") as mock_recover,
+        ):
             toolkit._shell_initialized = True
 
             result = await toolkit.run_bash("echo test")
@@ -460,9 +471,10 @@ class TestBashToolkitShellRecovery:
         mock_old_child = Mock()
         toolkit.child = mock_old_child
 
-        with patch.object(toolkit, "_initialize_shell") as mock_init, patch.object(
-            toolkit, "_setup_workspace"
-        ) as mock_setup:
+        with (
+            patch.object(toolkit, "_initialize_shell") as mock_init,
+            patch.object(toolkit, "_setup_workspace") as mock_setup,
+        ):
             toolkit._recover_shell()
 
             mock_old_child.close.assert_called_once()
@@ -478,9 +490,10 @@ class TestBashToolkitShellRecovery:
         mock_old_child.close.side_effect = Exception("Close failed")
         toolkit.child = mock_old_child
 
-        with patch.object(toolkit, "_initialize_shell") as mock_init, patch.object(
-            toolkit, "_setup_workspace"
-        ) as mock_setup:
+        with (
+            patch.object(toolkit, "_initialize_shell") as mock_init,
+            patch.object(toolkit, "_setup_workspace") as mock_setup,
+        ):
             # Should not raise exception
             toolkit._recover_shell()
 

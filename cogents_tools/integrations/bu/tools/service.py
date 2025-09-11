@@ -48,7 +48,7 @@ from cogents_tools.integrations.bu.tools.views import (
     UploadFileAction,
 )
 from cogents_tools.integrations.bu.utils import _log_pretty_url, time_execution_sync
-from cogents_tools.integrations.utils.llm_adapter import BaseChatModel, SystemMessage, UserMessage
+from cogents_tools.integrations.llm import BaseChatModel, SystemMessage, UserMessage
 
 logger = logging.getLogger(__name__)
 

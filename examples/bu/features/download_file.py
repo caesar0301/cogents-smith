@@ -10,7 +10,7 @@ load_dotenv()
 
 
 from cogents_tools.integrations.bu import Agent, BrowserProfile, BrowserSession
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:

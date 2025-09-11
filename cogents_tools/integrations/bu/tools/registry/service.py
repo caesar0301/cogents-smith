@@ -20,7 +20,7 @@ from cogents_tools.integrations.bu.tools.registry.views import (
     SpecialActionParameters,
 )
 from cogents_tools.integrations.bu.utils import is_new_tab_page, match_url_with_domain_pattern, time_execution_async
-from cogents_tools.integrations.utils.llm_adapter import BaseChatModel
+from cogents_tools.integrations.llm import BaseChatModel
 
 Context = TypeVar("Context")
 

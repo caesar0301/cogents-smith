@@ -103,9 +103,11 @@ class ConversationManager:
             conversation_purpose=conversation_purpose,
             missing_required_slots=missing_required_slots,
             intent_type=state.next_action_plan.intent_type if state.next_action_plan else "casual conversation",
-            next_action_reasoning=state.next_action_plan.reasoning
-            if state.next_action_plan
-            else "Building rapport and guiding conversation naturally toward the purpose",
+            next_action_reasoning=(
+                state.next_action_plan.reasoning
+                if state.next_action_plan
+                else "Building rapport and guiding conversation naturally toward the purpose"
+            ),
             known_slots=str(state.extracted_info) if state.extracted_info else "Nothing specific collected yet",
         )
         utterance = self.llm.completion(

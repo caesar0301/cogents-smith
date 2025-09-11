@@ -54,7 +54,7 @@ os.environ["ANONYMIZED_TELEMETRY"] = "false"
 
 
 from cogents_tools.integrations.bu import Agent, BrowserProfile
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 # Configuration LLM
 api_key = os.getenv("AZURE_OPENAI_KEY")

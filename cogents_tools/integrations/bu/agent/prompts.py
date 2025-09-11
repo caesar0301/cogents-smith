@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal, Optional
 
 from pydantic import BaseModel
 
-from cogents_tools.integrations.utils.llm_adapter import ContentImage, ContentText, SystemMessage, UserMessage
+from cogents_tools.integrations.llm import ContentImage, ContentText, SystemMessage, UserMessage
 
 
 class ImageURL(BaseModel):
@@ -62,9 +62,11 @@ class SystemPrompt:
                 template_filename = "system_prompt_no_thinking.md"
 
             # This works both in development and when installed as a package
-            with importlib.resources.files("cogents_tools.integrations.bu.agent").joinpath(template_filename).open(
-                "r", encoding="utf-8"
-            ) as f:
+            with (
+                importlib.resources.files("cogents_tools.integrations.bu.agent")
+                .joinpath(template_filename)
+                .open("r", encoding="utf-8") as f
+            ):
                 self.prompt_template = f.read()
         except Exception as e:
             raise RuntimeError(f"Failed to load system prompt template: {e}")

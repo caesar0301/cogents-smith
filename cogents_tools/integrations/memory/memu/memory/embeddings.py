@@ -9,7 +9,7 @@ import logging
 from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
-    from cogents_tools.integrations.utils.llm_adapter import BaseLLMClient
+    from cogents_tools.integrations.llm import BaseLLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ def create_embedding_client(llm_client: "BaseLLMClient") -> EmbeddingClient:
         EmbeddingClient instance
 
     Example:
-        from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memu_compatible
+        from cogents_tools.integrations.llm import get_llm_client_memu_compatible
 
         llm_client = get_llm_client_memu_compatible()
         embedding_client = create_embedding_client(llm_client)
@@ -122,7 +122,7 @@ def get_default_embedding_client() -> Optional[EmbeddingClient]:
     """
     try:
         # Import here to avoid circular imports
-        from cogents_tools.integrations.utils.llm_adapter import get_llm_client_memu_compatible
+        from cogents_tools.integrations.llm import get_llm_client_memu_compatible
 
         llm_client = get_llm_client_memu_compatible()
         if llm_client is None:

@@ -180,7 +180,10 @@ class TestAudioAliyunToolkit:
     @patch("cogents_tools.toolkits.audio_aliyun_toolkit.AudioAliyunToolkit.transcribe_audio")
     async def test_audio_qa_success(self, mock_transcribe, aliyun_toolkit):
         """Test successful audio Q&A."""
-        mock_transcribe.return_value = {"text": "这是一段关于人工智能的讨论。主要讨论了机器学习的应用。", "provider": "aliyun_nls"}
+        mock_transcribe.return_value = {
+            "text": "这是一段关于人工智能的讨论。主要讨论了机器学习的应用。",
+            "provider": "aliyun_nls",
+        }
 
         # Mock LLM client
         mock_llm_client = AsyncMock()
@@ -240,7 +243,9 @@ class TestAudioAliyunToolkitIntegration:
         get_response = json.dumps(
             {
                 "StatusText": "SUCCESS",
-                "Result": {"Sentences": [{"Text": "这是测试音频转录结果。", "BeginTime": 0, "EndTime": 2000, "ChannelId": 0}]},
+                "Result": {
+                    "Sentences": [{"Text": "这是测试音频转录结果。", "BeginTime": 0, "EndTime": 2000, "ChannelId": 0}]
+                },
             }
         )
 
@@ -315,7 +320,9 @@ class TestAudioAliyunToolkitIntegration:
         get_response = json.dumps(
             {
                 "StatusText": "SUCCESS",
-                "Result": {"Sentences": [{"Text": "完整工作流程测试文本。", "BeginTime": 0, "EndTime": 3000, "ChannelId": 0}]},
+                "Result": {
+                    "Sentences": [{"Text": "完整工作流程测试文本。", "BeginTime": 0, "EndTime": 3000, "ChannelId": 0}]
+                },
             }
         )
 

@@ -569,9 +569,9 @@ def get_browser_use_version() -> str:
                 match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
                 if match:
                     version = f"{match.group(1)}"
-                    os.environ[
-                        "LIBRARY_VERSION"
-                    ] = version  # used by bubus event_schema so all Event schemas include versioning
+                    os.environ["LIBRARY_VERSION"] = (
+                        version  # used by bubus event_schema so all Event schemas include versioning
+                    )
                     return version
 
         # If pyproject.toml doesn't exist, try getting version from pip

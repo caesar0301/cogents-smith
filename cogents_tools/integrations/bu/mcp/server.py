@@ -32,7 +32,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 try:
     import psutil
@@ -82,7 +82,7 @@ from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
 from cogents_tools.integrations.bu.config import get_default_llm, get_default_profile, load_browser_use_config
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
 from cogents_tools.integrations.bu.tools.service import Tools
-from cogents_tools.integrations.utils.llm_adapter import BaseChatModel
+from cogents_tools.integrations.llm import BaseChatModel
 
 logger = logging.getLogger(__name__)
 

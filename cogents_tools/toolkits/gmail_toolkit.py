@@ -524,9 +524,7 @@ class GmailToolkit(AsyncBaseToolkit):
                                 )
 
             if not codes_found:
-                return (
-                    f"🔍 Found {len(emails)} verification emails but no codes could be extracted. Check emails manually."
-                )
+                return f"🔍 Found {len(emails)} verification emails but no codes could be extracted. Check emails manually."
 
             # Format results
             content = (

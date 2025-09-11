@@ -20,7 +20,7 @@ import time
 import uuid
 from typing import Any, Dict, List
 
-from cogents_tools.integrations.utils.embedgen import EmbeddingGenerator
+from cogents_tools.integrations.embedgen import EmbeddingGenerator
 from cogents_tools.integrations.vector_store import PGVectorStore
 
 # Configure logging

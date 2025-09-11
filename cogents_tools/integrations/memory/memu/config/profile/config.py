@@ -13,7 +13,9 @@ class ProfileConfig:
     # Basic information
     name: str = "profile"
     filename: str = "profile.md"
-    description: str = "Record character's basic personal information only (age, location, background, demographics) - excludes events and activities"
+    description: str = (
+        "Record character's basic personal information only (age, location, background, demographics) - excludes events and activities"
+    )
 
     # Folder path
     folder_name: str = "profile"

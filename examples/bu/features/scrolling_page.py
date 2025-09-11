@@ -12,7 +12,7 @@ load_dotenv()
 
 from cogents_tools.integrations.bu import Agent
 from cogents_tools.integrations.bu.browser import BrowserProfile, BrowserSession
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 if not os.getenv("OPENAI_API_KEY"):
     raise ValueError("OPENAI_API_KEY is not set")

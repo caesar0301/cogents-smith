@@ -29,7 +29,7 @@ load_dotenv()
 
 from cogents_tools.integrations.bu.agent.service import Agent, Tools
 from cogents_tools.integrations.bu.browser import BrowserSession
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 # Initialize tools and registry
 tools = Tools()

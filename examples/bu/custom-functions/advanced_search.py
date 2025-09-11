@@ -16,7 +16,7 @@ from pydantic import BaseModel
 
 from cogents_tools.integrations.bu import ActionResult, Agent, Tools
 from cogents_tools.integrations.bu.browser.profile import BrowserProfile
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 logger = logging.getLogger(__name__)
 

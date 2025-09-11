@@ -2,7 +2,6 @@
 Prompts for AskuraAgent - Structured prompts for conversation analysis and management.
 """
 
-
 # Structured extraction prompts - optimized for structured_completion
 CONVERSATION_ANALYSIS_SYSTEM_PROMPTS = {
     "conversation_context": """Analyze conversation style and alignment with purpose.

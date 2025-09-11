@@ -10,7 +10,7 @@ from cogents_tools.integrations.bu.browser.views import BrowserStateSummary
 from cogents_tools.integrations.bu.filesystem.file_system import FileSystem
 from cogents_tools.integrations.bu.observability import observe_debug
 from cogents_tools.integrations.bu.utils import match_url_with_domain_pattern, time_execution_sync
-from cogents_tools.integrations.utils.llm_adapter import BaseMessage, ContentImage, ContentText, SystemMessage
+from cogents_tools.integrations.llm import BaseMessage, ContentImage, ContentText, SystemMessage
 
 logger = logging.getLogger(__name__)
 

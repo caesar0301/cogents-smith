@@ -223,7 +223,9 @@ class GetDropdownOptionsEvent(ElementSelectedEvent[dict[str, str]]):
 
     node: "EnhancedDOMTreeNode"
 
-    event_timeout: float | None = 15.0  # some dropdowns lazy-load the list of options on first interaction, so we need to wait for them to load (e.g. table filter lists can have thousands of options)
+    event_timeout: float | None = (
+        15.0  # some dropdowns lazy-load the list of options on first interaction, so we need to wait for them to load (e.g. table filter lists can have thousands of options)
+    )
 
 
 class SelectDropdownOptionEvent(ElementSelectedEvent[dict[str, str]]):

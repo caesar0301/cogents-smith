@@ -3,6 +3,7 @@ Unified test configuration for cogents.
 
 This file provides shared fixtures and configuration for both unit and integration tests.
 """
+
 import os
 import uuid
 

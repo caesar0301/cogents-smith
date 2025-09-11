@@ -14,7 +14,7 @@ from typing import Any, Generic, Literal, TypeVar
 from dotenv import load_dotenv
 
 from cogents_tools.integrations.bu.agent.message_manager.utils import save_conversation
-from cogents_tools.integrations.utils.llm_adapter import (
+from cogents_tools.integrations.llm import (
     BaseChatModel,
     BaseMessage,
     ContentImage,
@@ -1551,9 +1551,9 @@ class Agent(Generic[Context, AgentStructuredOutput]):
             result = await self.multi_act(self.initial_actions, check_for_new_elements=False)
             # update result 1 to mention that its was automatically loaded
             if result and self.initial_url and result[0].long_term_memory:
-                result[
-                    0
-                ].long_term_memory = f"Found initial url and automatically loaded it. {result[0].long_term_memory}"
+                result[0].long_term_memory = (
+                    f"Found initial url and automatically loaded it. {result[0].long_term_memory}"
+                )
             self.state.last_result = result
             self.logger.debug("Initial actions completed")
 

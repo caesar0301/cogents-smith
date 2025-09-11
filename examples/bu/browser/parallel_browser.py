@@ -1,7 +1,7 @@
 import asyncio
 
 from cogents_tools.integrations.bu import Agent, Browser
-from cogents_tools.integrations.utils.llm_adapter import get_llm_client_bu_compatible
+from cogents_tools.integrations.llm import get_llm_client_bu_compatible
 
 # NOTE: This is still experimental, and agents might conflict each other.
 

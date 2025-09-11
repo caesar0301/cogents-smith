@@ -98,8 +98,9 @@ class TestGoogleAISearchAsync:
     @pytest.fixture
     def google_ai_search(self):
         """Create GoogleAISearch instance for testing."""
-        with patch.dict("os.environ", {"GEMINI_API_KEY": "test_key"}), patch(
-            "cogents_tools.integrations.search.google_ai_search.GenAIClient"
+        with (
+            patch.dict("os.environ", {"GEMINI_API_KEY": "test_key"}),
+            patch("cogents_tools.integrations.search.google_ai_search.GenAIClient"),
         ):
             return GoogleAISearch()
 
