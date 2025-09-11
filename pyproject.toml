@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cogents-tools"
-version = "0.1.5.4"
+version = "0.1.6"
 description = "Supportive tools for Cogents, towards a cognitive agentic system"
 readme = "README.md"
 license = "MIT"

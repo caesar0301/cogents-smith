@@ -23,9 +23,7 @@ async def main():
     import time
 
     start_time = time.time()
-    history = await agent.run()
-    # token usage
-    print(history.usage)
+    await agent.run()
     end_time = time.time()
     print(f"Time taken: {end_time - start_time} seconds")
 
