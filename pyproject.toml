@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cogents-tools"
-version = "0.1.5.2"
+version = "0.1.5.3"
 description = "Supportive tools for Cogents, towards a cognitive agentic system"
 readme = "README.md"
 license = "MIT"
@@ -32,14 +32,7 @@ dependencies = [
     "anyio>=4.9.0",
     "httpx>=0.28.1",
     "psutil>=7.0.0",
-]
-
-[project.urls]
-Homepage = "https://github.com/mirasurf/cogents-tools"
-Repository = "https://github.com/mirasurf/cogents-tools"
-
-[project.optional-dependencies]
-integrations = [
+    # observability
     "opik>=0.2.0",
     # browser use
     "screeninfo>=0.8.1",
@@ -57,9 +50,7 @@ integrations = [
     "weaviate-client>=4.16.9",
     "psycopg2>=2.9.10",
     "psycopg2-binary>=2.9.0",
-]
-
-toolkits = [
+    #-- toolkits --
     # academic
     "arxiv>=2.2.0",
     # development
@@ -82,6 +73,11 @@ toolkits = [
     "wikipedia-api>=0.6.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/mirasurf/cogents-tools"
+Repository = "https://github.com/mirasurf/cogents-tools"
+
+[project.optional-dependencies]
 dev = [
     "pytest>=8.2,<9",
     "pytest-cov>=4.0.0",
