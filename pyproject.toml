@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cogents-tools"
-version = "0.1.5.3"
+version = "0.1.5.4"
 description = "Supportive tools for Cogents, towards a cognitive agentic system"
 readme = "README.md"
 license = "MIT"
@@ -68,8 +68,6 @@ dependencies = [
     "google-auth-oauthlib>=1.2.2",
     "google-auth>=2.40.3",
     # info retrieval
-    "tavily-python>=0.3.0",
-    "langchain-tavily>=0.2.11",
     "wikipedia-api>=0.6.0",
 ]
 
@@ -95,6 +93,13 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["cogents_tools*"]
+
+[tool.setuptools.package-data]
+"cogents_tools.integrations.bu.agent" = ["*.md"]
+"cogents_tools.integrations.bu" = ["*.md"]
+"cogents_tools.integrations.memory.memu.config" = ["*.md"]
+"cogents_tools.agents.seekra_agent" = ["*.md"]
+"cogents_tools.agents.askura_agent" = ["*.md"]
 
 [tool.black]
 line-length = 120
