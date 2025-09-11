@@ -282,11 +282,16 @@ def pytest_runtest_teardown(item, nextitem):
 def ensure_toolkits_available():
     """Ensure all toolkits are available for the entire test session."""
     try:
-        # Force load all lazy toolkits to register them with cogents_core
-        from cogents_tools import force_load_all_toolkits
+        # Import all toolkits to register them
+        from cogents_tools.groups import get_available_groups, load_toolkit_group
 
-        loaded_toolkits = force_load_all_toolkits()
-        print(f"Force loaded {len(loaded_toolkits)} toolkits: {list(loaded_toolkits.keys())}")
+        # Load all toolkit groups to ensure they're registered
+        for group_name in get_available_groups():
+            try:
+                toolkits = load_toolkit_group(group_name)
+                print(f"Loaded group '{group_name}': {list(toolkits.keys())}")
+            except Exception as e:
+                print(f"Warning: Could not load group '{group_name}': {e}")
 
         # Check toolkit registry
         from cogents_core.toolify.registry import ToolkitRegistry
@@ -294,7 +299,7 @@ def ensure_toolkits_available():
         registered_toolkits = ToolkitRegistry.list_toolkits()
         print(f"Session toolkits available: {registered_toolkits}")
 
-        # If still not enough toolkits, try builtin discovery as fallback
+        # If not enough toolkits, try builtin discovery
         if len(registered_toolkits) < 10:  # Should have many toolkits
             try:
                 from cogents_core.toolify.registry import _discover_builtin_toolkits

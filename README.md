@@ -8,7 +8,7 @@ This is part of [project Cogents](https://github.com/mirasurf/cogents), an initi
 
 ## 🎯 Core Capabilities
 
-Cogents-tools has evolved into a mature, production-ready toolkit ecosystem featuring **advanced lazy loading** and **semantic organization**. The project now offers 17+ specialized toolkits organized into 10 semantic groups, providing comprehensive coverage for cognitive agent development.
+Cogents-tools has evolved into a mature, production-ready toolkit ecosystem featuring **semantic organization**. The project now offers 17+ specialized toolkits organized into 10 semantic groups, providing comprehensive coverage for cognitive agent development.
 
 #### Extensible Resources & Infrastructure
 - **Web Search**: Multi-provider integration (Tavily, Google AI Search, Serper)
@@ -31,14 +31,13 @@ Cogents-tools has evolved into a mature, production-ready toolkit ecosystem feat
 - **Extensible Registry**: Easy integration of custom tools and capabilities
 - **Error Resilience**: Graceful handling of missing dependencies and failures
 
-## ⚡ Lazy Loading & Performance
+## 📦 Semantic Organization
 
-Cogents-tools features an advanced **lazy loading system** that dramatically improves import performance and reduces memory usage:
+Cogents-tools features **semantic organization** that makes it easy to find and use related toolkits:
 
-- **🚀 Fast imports**: Only load what you need, when you need it
+- **🎯 Organized structure**: Toolkits grouped by functionality
 - **📦 Group-wise loading**: Import semantic groups of related toolkits
-- **💾 Memory efficient**: Unused toolkits remain unloaded
-- **🔧 Zero configuration**: Lazy loading is enabled by default
+- **🔧 Easy discovery**: Simple group-based API
 
 ### Available Toolkit Groups
 
@@ -63,22 +62,16 @@ pip install -U cogents-tools
 
 ## 🚀 Quick Examples
 
-### Lazy Loading
+### Group Loading
 
 ```python
 import cogents_tools
-
-# Check lazy loading status
-print(f"Lazy loading enabled: {cogents_tools.is_lazy_loading_enabled()}")
 
 # Get available groups
 print(f"Available groups: {cogents_tools.get_available_groups()}")
 
 # Load specific group
 dev_toolkits = cogents_tools.load_toolkit_group('development')
-
-# Monitor loaded modules
-print(f"Loaded modules: {cogents_tools.get_loaded_modules()}")
 ```
 
 ### Agent-Tools Integration
@@ -92,7 +85,7 @@ Explore the capabilities with our comprehensive demo scripts under [examples](./
 ## Best Practices
 
 1. **Use group imports** for related functionality
-2. **Keep lazy loading enabled** unless you have specific requirements
+2. **Use semantic groups** to organize your toolkit imports
 3. **Use the demos** to understand performance characteristics
 
 ## License

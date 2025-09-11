@@ -5,9 +5,122 @@ This module provides convenient imports for semantic groups of toolkits,
 allowing users to import related functionality together.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
-from .lazy_import import get_available_groups, get_group_toolkits, lazy_import, load_toolkit_group
+# Toolkit group definitions
+TOOLKIT_GROUPS = {
+    "academic": ["arxiv_toolkit"],
+    "image": ["image_toolkit"],
+    "video": ["video_toolkit"],
+    "audio": [
+        "audio_toolkit",
+        "audio_aliyun_toolkit",
+    ],
+    "development": [
+        "bash_toolkit",
+        "file_edit_toolkit",
+        "github_toolkit",
+        "python_executor_toolkit",
+        "tabular_data_toolkit",
+    ],
+    "file_processing": [
+        "document_toolkit",
+        "file_edit_toolkit",
+        "tabular_data_toolkit",
+    ],
+    "communication": ["gmail_toolkit"],
+    "info_retrieval": [
+        "search_toolkit",
+        "serper_toolkit",
+        "wikipedia_toolkit",
+    ],
+    "memorization": ["memory_toolkit"],
+    "hitl": ["user_interaction_toolkit"],  # human in the loop
+}
+
+# Reverse mapping for toolkit to groups
+TOOLKIT_TO_GROUPS = {}
+for group, toolkits in TOOLKIT_GROUPS.items():
+    for toolkit in toolkits:
+        if toolkit not in TOOLKIT_TO_GROUPS:
+            TOOLKIT_TO_GROUPS[toolkit] = []
+        TOOLKIT_TO_GROUPS[toolkit].append(group)
+
+
+def _import_toolkit(toolkit_name: str):
+    """Import a toolkit dynamically and ensure it's registered."""
+    import importlib
+
+    toolkit_modules = {
+        "arxiv_toolkit": "cogents_tools.toolkits.arxiv_toolkit",
+        "audio_aliyun_toolkit": "cogents_tools.toolkits.audio_aliyun_toolkit",
+        "audio_toolkit": "cogents_tools.toolkits.audio_toolkit",
+        "bash_toolkit": "cogents_tools.toolkits.bash_toolkit",
+        "document_toolkit": "cogents_tools.toolkits.document_toolkit",
+        "file_edit_toolkit": "cogents_tools.toolkits.file_edit_toolkit",
+        "github_toolkit": "cogents_tools.toolkits.github_toolkit",
+        "gmail_toolkit": "cogents_tools.toolkits.gmail_toolkit",
+        "image_toolkit": "cogents_tools.toolkits.image_toolkit",
+        "memory_toolkit": "cogents_tools.toolkits.memory_toolkit",
+        "python_executor_toolkit": "cogents_tools.toolkits.python_executor_toolkit",
+        "search_toolkit": "cogents_tools.toolkits.search_toolkit",
+        "serper_toolkit": "cogents_tools.toolkits.serper_toolkit",
+        "tabular_data_toolkit": "cogents_tools.toolkits.tabular_data_toolkit",
+        "user_interaction_toolkit": "cogents_tools.toolkits.user_interaction_toolkit",
+        "video_toolkit": "cogents_tools.toolkits.video_toolkit",
+        "wikipedia_toolkit": "cogents_tools.toolkits.wikipedia_toolkit",
+    }
+
+    if toolkit_name not in toolkit_modules:
+        raise ImportError(f"Unknown toolkit: {toolkit_name}")
+
+    module_path = toolkit_modules[toolkit_name]
+    # Import the module to trigger @register_toolkit decorators
+    module = importlib.import_module(module_path)
+
+    # Find toolkit class in the module
+    for attr_name in dir(module):
+        attr = getattr(module, attr_name)
+        if (
+            hasattr(attr, "__name__")
+            and attr.__name__.endswith("Toolkit")
+            and hasattr(attr, "__module__")
+            and attr.__module__ == module_path
+        ):
+            return attr
+
+    raise ImportError(f"No toolkit class found in {module_path}")
+
+
+def load_toolkit_group(group_name: str) -> Dict[str, Any]:
+    """Load all toolkits in a semantic group."""
+    if group_name not in TOOLKIT_GROUPS:
+        raise ValueError(f"Unknown toolkit group: {group_name}. Available groups: {list(TOOLKIT_GROUPS.keys())}")
+
+    loaded_toolkits = {}
+    toolkits = TOOLKIT_GROUPS[group_name]
+
+    for toolkit_name in toolkits:
+        try:
+            toolkit_class = _import_toolkit(toolkit_name)
+            loaded_toolkits[toolkit_name] = toolkit_class
+        except Exception as e:
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to load toolkit {toolkit_name}: {e}")
+
+    return loaded_toolkits
+
+
+def get_available_groups() -> List[str]:
+    """Get list of available toolkit groups."""
+    return list(TOOLKIT_GROUPS.keys())
+
+
+def get_group_toolkits(group_name: str) -> List[str]:
+    """Get list of toolkits in a group."""
+    return TOOLKIT_GROUPS.get(group_name, [])
 
 
 class ToolkitGroup:
@@ -19,7 +132,7 @@ class ToolkitGroup:
 
     @property
     def toolkits(self) -> Dict[str, Any]:
-        """Get the toolkits in this group (lazy loaded)."""
+        """Get the toolkits in this group."""
         if self._toolkits is None:
             self._toolkits = load_toolkit_group(self.group_name)
         return self._toolkits
@@ -40,7 +153,6 @@ class ToolkitGroup:
 
 
 # Create group instances
-@lazy_import
 def academic() -> ToolkitGroup:
     """
     Academic research toolkits.
@@ -56,7 +168,6 @@ def academic() -> ToolkitGroup:
     return ToolkitGroup("academic")
 
 
-@lazy_import
 def image() -> ToolkitGroup:
     """
     Image processing and analysis toolkits.
@@ -72,7 +183,6 @@ def image() -> ToolkitGroup:
     return ToolkitGroup("image")
 
 
-@lazy_import
 def video() -> ToolkitGroup:
     """
     Video processing and analysis toolkits.
@@ -87,7 +197,6 @@ def video() -> ToolkitGroup:
     return ToolkitGroup("video")
 
 
-@lazy_import
 def audio() -> ToolkitGroup:
     """
     Audio processing and analysis toolkits.
@@ -105,7 +214,6 @@ def audio() -> ToolkitGroup:
     return ToolkitGroup("audio")
 
 
-@lazy_import
 def development() -> ToolkitGroup:
     """
     Development and programming toolkits.
@@ -126,7 +234,6 @@ def development() -> ToolkitGroup:
     return ToolkitGroup("development")
 
 
-@lazy_import
 def file_processing() -> ToolkitGroup:
     """
     File processing and manipulation toolkits.
@@ -145,7 +252,6 @@ def file_processing() -> ToolkitGroup:
     return ToolkitGroup("file_processing")
 
 
-@lazy_import
 def communication() -> ToolkitGroup:
     """
     Communication and messaging toolkits.
@@ -161,7 +267,6 @@ def communication() -> ToolkitGroup:
     return ToolkitGroup("communication")
 
 
-@lazy_import
 def info_retrieval() -> ToolkitGroup:
     """
     Information retrieval and search toolkits.
@@ -180,7 +285,6 @@ def info_retrieval() -> ToolkitGroup:
     return ToolkitGroup("info_retrieval")
 
 
-@lazy_import
 def persistence() -> ToolkitGroup:
     """
     Data persistence and storage toolkits.
@@ -196,7 +300,6 @@ def persistence() -> ToolkitGroup:
     return ToolkitGroup("persistence")
 
 
-@lazy_import
 def hitl() -> ToolkitGroup:
     """
     Human-in-the-loop (HITL) interaction toolkits.
