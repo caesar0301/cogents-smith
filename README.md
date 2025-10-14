@@ -1,10 +1,10 @@
 # Cogents-Tools
 
-[![CI](https://github.com/mirasurf/cogents-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/mirasurf/cogents-tools/actions/workflows/ci.yml)
+[![CI](https://github.com/caesar0301/cogents-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/caesar0301/cogents-tools/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/cogents-tools.svg)](https://pypi.org/project/cogents-tools/)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/mirasurf/cogents-tools)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/caesar0301/cogents-tools)
 
-This is part of [project Cogents](https://github.com/mirasurf/cogents), an initiative to develop a cognitive, computation-driven agentic system. This repo is built upon [cogents-core](https://github.com/mirasurf/cogents-core) and hosts an extensive and extendable list of integrated services, well-tested toolkits, and ready-to-go agents. Our philosophy focuses on a modular, composable design that can be easily integrated into existing systems or used to build new ones from the ground up.
+This is part of [project Cogents](https://github.com/caesar0301/cogents), an initiative to develop a cognitive, computation-driven agentic system. This repo is built upon [cogents-core](https://github.com/caesar0301/cogents-core) and hosts an extensive and extendable list of integrated services, well-tested toolkits, and ready-to-go agents. Our philosophy focuses on a modular, composable design that can be easily integrated into existing systems or used to build new ones from the ground up.
 
 ## 🎯 Core Capabilities
 

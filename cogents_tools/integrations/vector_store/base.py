@@ -1,5 +1,5 @@
 """
-Copyright (c) 2025 Mirasurf
+Copyright (c) 2025 Xiaming Chen
 Copyright (c) 2023-2025 mem0ai/mem0
 Original code from https://github.com/mem0ai/mem0
 Licensed under the Apache License, Version 2.0

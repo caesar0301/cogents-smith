@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cogents-tools"
-version = "0.1.7"
+version = "0.1.8"
 description = "Supportive tools for Cogents, towards a cognitive agentic system"
 readme = "README.md"
 license = "MIT"
@@ -72,8 +72,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mirasurf/cogents-tools"
-Repository = "https://github.com/mirasurf/cogents-tools"
+Homepage = "https://github.com/caesar0301/cogents-tools"
+Repository = "https://github.com/caesar0301/cogents-tools"
 
 [project.optional-dependencies]
 dev = [
