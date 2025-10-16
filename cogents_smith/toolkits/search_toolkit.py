@@ -14,8 +14,7 @@ from cogents_core.toolify.base import AsyncBaseToolkit
 from cogents_core.toolify.config import ToolkitConfig
 from cogents_core.toolify.registry import register_toolkit
 from cogents_core.utils.logging import get_logger
-
-from cogents_smith.integrations.search import SearchResult
+from wizsearch import SearchResult
 
 logger = get_logger(__name__)
 
@@ -336,7 +335,7 @@ Please list any URLs, links, or references mentioned in the content that could p
         self.logger.info(f"Performing Tavily search for query: {query}")
 
         try:
-            from cogents_smith.integrations.search import TavilySearchWrapper
+            from wizsearch import TavilySearch
 
             # Initialize Tavily Search client with configuration
             config_kwargs = {
@@ -346,7 +345,7 @@ Please list any URLs, links, or references mentioned in the content that could p
                 "include_raw_content": include_raw_content,
             }
 
-            tavily_search = TavilySearchWrapper(**config_kwargs)
+            tavily_search = TavilySearch(**config_kwargs)
 
             # Perform search
             result = tavily_search.search(query=query)
@@ -413,7 +412,7 @@ Please list any URLs, links, or references mentioned in the content that could p
         self.logger.info(f"Performing Google AI search for query: {query}")
 
         try:
-            from cogents_smith.integrations.search import GoogleAISearch
+            from wizsearch import GoogleAISearch
 
             # Initialize Google AI Search client
             google = GoogleAISearch()

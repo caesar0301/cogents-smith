@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cogents-smith"
-version = "0.1.8"
-description = "Supportive tools for Cogents, towards a cognitive agentic system"
+version = "0.2.0"
+description = "Agentic toolkit for COGENTS"
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -32,10 +32,7 @@ dependencies = [
     "anyio>=4.9.0",
     "httpx>=0.28.1",
     "psutil>=7.0.0",
-    # search
-    "google-genai>=1.29.0,<2.0.0",
-    "tavily-python>=0.3.0",
-    "langchain-tavily>=0.2.11",
+    "wizsearch>=1.0.1,<2.0.0",
     #-- toolkits --
     # academic
     "arxiv>=2.2.0",
@@ -81,9 +78,6 @@ where = ["."]
 include = ["cogents_smith*"]
 
 [tool.setuptools.package-data]
-"cogents_smith.integrations.bu.agent" = ["*.md"]
-"cogents_smith.integrations.bu" = ["*.md"]
-"cogents_smith.integrations.memory.memu.config" = ["*.md"]
 "cogents_smith.agents.seekra_agent" = ["*.md"]
 "cogents_smith.agents.askura_agent" = ["*.md"]
 
