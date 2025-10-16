@@ -1,4 +1,4 @@
-# Cogents-Tools
+# CogentsSmith
 
 [![CI](https://github.com/caesar0301/cogents-smith/actions/workflows/ci.yml/badge.svg)](https://github.com/caesar0301/cogents-smith/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/cogents-smith.svg)](https://pypi.org/project/cogents-smith/)
@@ -8,7 +8,7 @@ This is part of [project Cogents](https://github.com/caesar0301/cogents), an ini
 
 ## 🎯 Core Capabilities
 
-Cogents-tools has evolved into a mature, production-ready toolkit ecosystem featuring **semantic organization**. The project now offers 17+ specialized toolkits organized into 10 semantic groups, providing comprehensive coverage for cognitive agent development.
+Cogents-smith has evolved into a mature, production-ready toolkit ecosystem featuring **semantic organization**. The project now offers 17+ specialized toolkits organized into 10 semantic groups, providing comprehensive coverage for cognitive agent development.
 
 #### Extensible Resources & Infrastructure
 - **Web Search**: Multi-provider integration (Tavily, Google AI Search, Serper)
@@ -33,7 +33,7 @@ Cogents-tools has evolved into a mature, production-ready toolkit ecosystem feat
 
 ## 📦 Semantic Organization
 
-Cogents-tools features **semantic organization** that makes it easy to find and use related toolkits:
+Cogents-smith features **semantic organization** that makes it easy to find and use related toolkits:
 
 - **🎯 Organized structure**: Toolkits grouped by functionality
 - **📦 Group-wise loading**: Import semantic groups of related toolkits
