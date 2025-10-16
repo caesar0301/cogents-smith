@@ -87,7 +87,7 @@ class TestGmailService:
 
     def test_gmail_service_initialization_with_access_token(self):
         """Test GmailService initialization with access token."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         service = GmailService(access_token="test_token")
 
@@ -95,10 +95,10 @@ class TestGmailService:
         assert service.config_dir == Path.home() / ".cogents"
         assert not service.is_authenticated()
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.Path.mkdir")
+    @patch("cogents_smith.toolkits.gmail_toolkit.Path.mkdir")
     def test_gmail_service_initialization_with_custom_paths(self, mock_mkdir):
         """Test GmailService initialization with custom paths."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         service = GmailService(
             credentials_file="/custom/creds.json", token_file="/custom/token.json", config_dir="/custom/config"
@@ -109,11 +109,11 @@ class TestGmailService:
         assert service.config_dir == Path("/custom/config").expanduser().resolve()
         mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.build")
-    @patch("cogents_tools.toolkits.gmail_toolkit.Credentials")
+    @patch("cogents_smith.toolkits.gmail_toolkit.build")
+    @patch("cogents_smith.toolkits.gmail_toolkit.Credentials")
     async def test_authenticate_with_access_token_success(self, mock_credentials, mock_build):
         """Test successful authentication with access token."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         # Mock credentials and Gmail service
         mock_creds = Mock()
@@ -129,11 +129,11 @@ class TestGmailService:
         assert service.service == mock_service
         mock_credentials.assert_called_once_with(token="test_token", scopes=service.SCOPES)
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.build")
-    @patch("cogents_tools.toolkits.gmail_toolkit.Credentials")
+    @patch("cogents_smith.toolkits.gmail_toolkit.build")
+    @patch("cogents_smith.toolkits.gmail_toolkit.Credentials")
     async def test_authenticate_with_access_token_failure(self, mock_credentials, mock_build):
         """Test authentication failure with access token."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         # Mock credentials to raise exception
         mock_build.side_effect = Exception("Authentication failed")
@@ -145,11 +145,11 @@ class TestGmailService:
         assert not service.is_authenticated()
 
     @patch("os.path.exists")
-    @patch("cogents_tools.toolkits.gmail_toolkit.Credentials.from_authorized_user_file")
-    @patch("cogents_tools.toolkits.gmail_toolkit.build")
+    @patch("cogents_smith.toolkits.gmail_toolkit.Credentials.from_authorized_user_file")
+    @patch("cogents_smith.toolkits.gmail_toolkit.build")
     async def test_authenticate_with_existing_tokens(self, mock_build, mock_from_file, mock_exists):
         """Test authentication with existing valid tokens."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         # Mock existing token file and valid credentials
         mock_exists.return_value = True
@@ -167,17 +167,17 @@ class TestGmailService:
 
     async def test_get_recent_emails_not_authenticated(self):
         """Test getting emails when not authenticated."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         service = GmailService()
         emails = await service.get_recent_emails()
 
         assert emails == []
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
     async def test_get_recent_emails_success(self, mock_is_auth, mock_gmail_service):
         """Test successful email retrieval."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         mock_is_auth.return_value = True
 
@@ -194,7 +194,7 @@ class TestGmailService:
 
     def test_parse_email(self):
         """Test email parsing functionality."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         service = GmailService()
 
@@ -221,7 +221,7 @@ class TestGmailService:
 
     def test_extract_body_simple(self):
         """Test extracting body from simple email."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         service = GmailService()
 
@@ -232,7 +232,7 @@ class TestGmailService:
 
     def test_extract_body_multipart(self):
         """Test extracting body from multipart email."""
-        from cogents_tools.toolkits.gmail_toolkit import GmailService
+        from cogents_smith.toolkits.gmail_toolkit import GmailService
 
         service = GmailService()
 
@@ -276,7 +276,7 @@ class TestGmailToolkit:
             assert tool_name in tools_map
             assert callable(tools_map[tool_name])
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.authenticate")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.authenticate")
     async def test_authenticate_gmail_success(self, mock_auth, gmail_toolkit):
         """Test successful Gmail authentication."""
         mock_auth.return_value = True
@@ -286,7 +286,7 @@ class TestGmailToolkit:
         assert "✅ Successfully authenticated" in result
         mock_auth.assert_called_once()
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.authenticate")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.authenticate")
     async def test_authenticate_gmail_failure(self, mock_auth, gmail_toolkit):
         """Test Gmail authentication failure."""
         mock_auth.return_value = False
@@ -295,7 +295,7 @@ class TestGmailToolkit:
 
         assert "❌ Failed to authenticate" in result
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.authenticate")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.authenticate")
     async def test_authenticate_gmail_exception(self, mock_auth, gmail_toolkit):
         """Test Gmail authentication with exception."""
         mock_auth.side_effect = Exception("Connection error")
@@ -305,8 +305,8 @@ class TestGmailToolkit:
         assert "❌ Gmail authentication error" in result
         assert "Connection error" in result
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.get_recent_emails")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.get_recent_emails")
     async def test_get_recent_emails_success(self, mock_get_emails, mock_is_auth, gmail_toolkit):
         """Test successful email retrieval."""
         mock_is_auth.return_value = True
@@ -327,9 +327,9 @@ class TestGmailToolkit:
         assert "test@example.com" in result
         mock_get_emails.assert_called_once_with(max_results=5, query="newer_than:1h test", time_filter="1h")
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.authenticate")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.get_recent_emails")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.authenticate")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.get_recent_emails")
     async def test_get_recent_emails_auto_authenticate(self, mock_get_emails, mock_auth, mock_is_auth, gmail_toolkit):
         """Test automatic authentication when not authenticated."""
         mock_is_auth.return_value = False
@@ -341,8 +341,8 @@ class TestGmailToolkit:
         mock_auth.assert_called_once()
         mock_get_emails.assert_called_once()
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.authenticate")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.authenticate")
     async def test_get_recent_emails_auth_failure(self, mock_auth, mock_is_auth, gmail_toolkit):
         """Test email retrieval when authentication fails."""
         mock_is_auth.return_value = False
@@ -352,8 +352,8 @@ class TestGmailToolkit:
 
         assert "❌ Failed to authenticate with Gmail" in result
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.get_recent_emails")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.get_recent_emails")
     async def test_get_recent_emails_no_results(self, mock_get_emails, mock_is_auth, gmail_toolkit):
         """Test email retrieval with no results."""
         mock_is_auth.return_value = True
@@ -372,8 +372,8 @@ class TestGmailToolkit:
             (100, 50),  # Should clamp to maximum 50
         ],
     )
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.get_recent_emails")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.get_recent_emails")
     async def test_get_recent_emails_parameter_validation(
         self, mock_get_emails, mock_is_auth, gmail_toolkit, max_results, expected
     ):
@@ -387,8 +387,8 @@ class TestGmailToolkit:
         call_args = mock_get_emails.call_args[1]
         assert call_args["max_results"] == expected
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.get_recent_emails")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.get_recent_emails")
     async def test_search_emails_success(self, mock_get_emails, mock_is_auth, gmail_toolkit):
         """Test successful email search."""
         mock_is_auth.return_value = True
@@ -407,8 +407,8 @@ class TestGmailToolkit:
         assert "Security Alert" in result
         mock_get_emails.assert_called_once_with(max_results=10, query="from:security@example.com", time_filter="30d")
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.get_recent_emails")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.get_recent_emails")
     async def test_search_emails_with_time_filter(self, mock_get_emails, mock_is_auth, gmail_toolkit):
         """Test email search with time filter."""
         mock_is_auth.return_value = True
@@ -420,8 +420,8 @@ class TestGmailToolkit:
         assert call_args["query"] == "newer_than:1h subject:verification"
         assert call_args["time_filter"] == "1h"
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.get_recent_emails")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.get_recent_emails")
     async def test_get_verification_codes_success(self, mock_get_emails, mock_is_auth, gmail_toolkit):
         """Test successful verification code extraction."""
         mock_is_auth.return_value = True
@@ -447,8 +447,8 @@ class TestGmailToolkit:
         # Both emails should be processed since they contain verification keywords
         assert "GitHub verification code" in result
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.get_recent_emails")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.get_recent_emails")
     async def test_get_verification_codes_no_codes_found(self, mock_get_emails, mock_is_auth, gmail_toolkit):
         """Test verification code extraction with no codes found."""
         mock_is_auth.return_value = True
@@ -466,8 +466,8 @@ class TestGmailToolkit:
         # This email contains security keywords but no extractable codes
         assert "Found 1 verification emails but no codes could be extracted" in result
 
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.is_authenticated")
-    @patch("cogents_tools.toolkits.gmail_toolkit.GmailService.get_recent_emails")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.is_authenticated")
+    @patch("cogents_smith.toolkits.gmail_toolkit.GmailService.get_recent_emails")
     async def test_get_verification_codes_filters_common_numbers(self, mock_get_emails, mock_is_auth, gmail_toolkit):
         """Test that common numbers are filtered out from verification codes."""
         mock_is_auth.return_value = True

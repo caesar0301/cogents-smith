@@ -2,8 +2,8 @@
 PYTHON = python3
 UV = uv
 PYTEST = pytest
-PYTHON_MODULES = cogents_tools tests examples
-COVERAGE_MODULES = cogents_tools
+PYTHON_MODULES = cogents_smith tests examples
+COVERAGE_MODULES = cogents_smith
 TEST_DIR = tests
 LINE_LENGTH = 120
 
@@ -159,7 +159,7 @@ requirements: ## Generate requirements files
 
 version: ## Show current version
 	@echo "$(BLUE)Current version:$(RESET)"
-	@echo "Cogents Tools (pyproject.toml): $(shell grep '^version = ' pyproject.toml | cut -d'"' -f2)"
+	@echo "Cogents Smith (pyproject.toml): $(shell grep '^version = ' pyproject.toml | cut -d'"' -f2)"
 
 # =============================================================================
 # DEVELOPMENT COMMANDS

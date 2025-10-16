@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cogents-tools"
+name = "cogents-smith"
 version = "0.1.8"
 description = "Supportive tools for Cogents, towards a cognitive agentic system"
 readme = "README.md"
@@ -32,24 +32,10 @@ dependencies = [
     "anyio>=4.9.0",
     "httpx>=0.28.1",
     "psutil>=7.0.0",
-    # observability
-    "opik>=0.2.0",
-    # browser use
-    "screeninfo>=0.8.1",
-    "uuid7>=0.1.0",
-    "authlib>=1.6.0",
-    "pypdf>=5.7.0",
-    "cdp-use>=1.4.0",
-    "markdown-pdf>=1.5",
-    "html2text>=2025.4.15",
     # search
     "google-genai>=1.29.0,<2.0.0",
     "tavily-python>=0.3.0",
     "langchain-tavily>=0.2.11",
-    # vector store
-    "weaviate-client>=4.16.9",
-    "psycopg2>=2.9.10",
-    "psycopg2-binary>=2.9.0",
     #-- toolkits --
     # academic
     "arxiv>=2.2.0",
@@ -72,8 +58,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/caesar0301/cogents-tools"
-Repository = "https://github.com/caesar0301/cogents-tools"
+Homepage = "https://github.com/caesar0301/cogents-smith"
+Repository = "https://github.com/caesar0301/cogents-smith"
 
 [project.optional-dependencies]
 dev = [
@@ -92,14 +78,14 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["cogents_tools*"]
+include = ["cogents_smith*"]
 
 [tool.setuptools.package-data]
-"cogents_tools.integrations.bu.agent" = ["*.md"]
-"cogents_tools.integrations.bu" = ["*.md"]
-"cogents_tools.integrations.memory.memu.config" = ["*.md"]
-"cogents_tools.agents.seekra_agent" = ["*.md"]
-"cogents_tools.agents.askura_agent" = ["*.md"]
+"cogents_smith.integrations.bu.agent" = ["*.md"]
+"cogents_smith.integrations.bu" = ["*.md"]
+"cogents_smith.integrations.memory.memu.config" = ["*.md"]
+"cogents_smith.agents.seekra_agent" = ["*.md"]
+"cogents_smith.agents.askura_agent" = ["*.md"]
 
 [tool.black]
 line-length = 120
@@ -117,7 +103,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["cogents_tools"]
+source = ["cogents_smith"]
 
 [tool.coverage.report]
 exclude_lines = [

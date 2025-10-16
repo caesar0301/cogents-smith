@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from cogents_tools.integrations.search import GoogleAISearch, SearchResult, SourceItem, TavilySearchWrapper
+from cogents_smith.integrations.search import GoogleAISearch, SearchResult, SourceItem, TavilySearchWrapper
 
 
 class TestTavilySearchWrapperAsync:
@@ -16,7 +16,7 @@ class TestTavilySearchWrapperAsync:
     @pytest.fixture
     def tavily_search(self):
         """Create TavilySearchWrapper instance for testing."""
-        with patch("cogents_tools.integrations.search.tavily_search.TavilySearch"):
+        with patch("cogents_smith.integrations.search.tavily_search.TavilySearch"):
             return TavilySearchWrapper(api_key="test_key")
 
     def test_async_search_success(self, tavily_search):
@@ -100,7 +100,7 @@ class TestGoogleAISearchAsync:
         """Create GoogleAISearch instance for testing."""
         with (
             patch.dict("os.environ", {"GEMINI_API_KEY": "test_key"}),
-            patch("cogents_tools.integrations.search.google_ai_search.GenAIClient"),
+            patch("cogents_smith.integrations.search.google_ai_search.GenAIClient"),
         ):
             return GoogleAISearch()
 

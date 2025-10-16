@@ -283,7 +283,7 @@ def ensure_toolkits_available():
     """Ensure all toolkits are available for the entire test session."""
     try:
         # Import all toolkits to register them
-        from cogents_tools.groups import get_available_groups, load_toolkit_group
+        from cogents_smith.groups import get_available_groups, load_toolkit_group
 
         # Load all toolkit groups to ensure they're registered
         for group_name in get_available_groups():

@@ -14,8 +14,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from cogents_tools.agents.seekra_agent import Configuration as SeekraAgentConfig
-from cogents_tools.agents.seekra_agent import SeekraAgent
+from cogents_smith.agents.seekra_agent import Configuration as SeekraAgentConfig
+from cogents_smith.agents.seekra_agent import SeekraAgent
 
 
 def main():

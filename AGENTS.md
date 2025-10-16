@@ -1,4 +1,4 @@
-# Coding Agent Rules of cogents-tools
+# Coding Agent Rules of cogents-smith
 
 ## General Rules
 

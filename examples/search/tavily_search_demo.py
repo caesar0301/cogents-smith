@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tavily Search Demo for cogents-tools
+Tavily Search Demo for cogents-smith
 """
 
 import asyncio
@@ -8,7 +8,7 @@ import os
 from typing import Any, Dict
 
 # Import web search functionality
-from cogents_tools.integrations.search import TavilySearchWrapper
+from cogents_smith.integrations.search import TavilySearchWrapper
 
 
 def print_section(title: str):

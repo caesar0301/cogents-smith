@@ -1,8 +1,8 @@
 # Cogents-Tools
 
-[![CI](https://github.com/caesar0301/cogents-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/caesar0301/cogents-tools/actions/workflows/ci.yml)
-[![PyPI version](https://img.shields.io/pypi/v/cogents-tools.svg)](https://pypi.org/project/cogents-tools/)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/caesar0301/cogents-tools)
+[![CI](https://github.com/caesar0301/cogents-smith/actions/workflows/ci.yml/badge.svg)](https://github.com/caesar0301/cogents-smith/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/cogents-smith.svg)](https://pypi.org/project/cogents-smith/)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/caesar0301/cogents-smith)
 
 This is part of [project Cogents](https://github.com/caesar0301/cogents), an initiative to develop a cognitive, computation-driven agentic system. This repo is built upon [cogents-core](https://github.com/caesar0301/cogents-core) and hosts an extensive and extendable list of integrated services, well-tested toolkits, and ready-to-go agents. Our philosophy focuses on a modular, composable design that can be easily integrated into existing systems or used to build new ones from the ground up.
 
@@ -57,7 +57,7 @@ Cogents-tools features **semantic organization** that makes it easy to find and 
 ## Install
 
 ```bash
-pip install -U cogents-tools
+pip install -U cogents-smith
 ```
 
 ## 🚀 Quick Examples
@@ -65,13 +65,13 @@ pip install -U cogents-tools
 ### Group Loading
 
 ```python
-import cogents_tools
+import cogents_smith
 
 # Get available groups
-print(f"Available groups: {cogents_tools.get_available_groups()}")
+print(f"Available groups: {cogents_smith.get_available_groups()}")
 
 # Load specific group
-dev_toolkits = cogents_tools.load_toolkit_group('development')
+dev_toolkits = cogents_smith.load_toolkit_group('development')
 ```
 
 ### Agent-Tools Integration

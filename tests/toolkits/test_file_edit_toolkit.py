@@ -12,7 +12,7 @@ from unittest.mock import patch
 import pytest
 from cogents_core.toolify.config import ToolkitConfig
 
-from cogents_tools.toolkits.file_edit_toolkit import FileEditToolkit
+from cogents_smith.toolkits.file_edit_toolkit import FileEditToolkit
 
 
 class TestFileEditToolkitInitialization:
@@ -281,7 +281,7 @@ class TestFileEditToolkitBackupCreation:
             test_file = toolkit.work_dir / "test.txt"
             test_file.write_text("content")
 
-            with patch("cogents_tools.toolkits.file_edit_toolkit.datetime") as mock_datetime:
+            with patch("cogents_smith.toolkits.file_edit_toolkit.datetime") as mock_datetime:
                 mock_datetime.now.return_value.strftime.return_value = "20231201_143000"
 
                 backup_path = toolkit._create_backup(test_file)

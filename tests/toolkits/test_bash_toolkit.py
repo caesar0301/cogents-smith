@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 import pytest
 from cogents_core.toolify.config import ToolkitConfig
 
-from cogents_tools.toolkits.bash_toolkit import BashToolkit
+from cogents_smith.toolkits.bash_toolkit import BashToolkit
 
 
 class TestBashToolkitInitialization:

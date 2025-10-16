@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Google AI Search Demo for cogents-tools
+Google AI Search Demo for cogents-smith
 """
 
 import asyncio
 from typing import Any, Dict
 
 # Import web search functionality
-from cogents_tools.integrations.search import GoogleAISearch
+from cogents_smith.integrations.search import GoogleAISearch
 
 # For demo purposes
 

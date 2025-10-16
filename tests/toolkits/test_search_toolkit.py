@@ -105,8 +105,8 @@ class TestSearchToolkit:
         assert isinstance(result, str)
         assert "Error" in result
 
-    @patch("cogents_tools.toolkits.search_toolkit.SearchToolkit.get_web_content")
-    @patch("cogents_tools.toolkits.search_toolkit.SearchToolkit.llm_client")
+    @patch("cogents_smith.toolkits.search_toolkit.SearchToolkit.get_web_content")
+    @patch("cogents_smith.toolkits.search_toolkit.SearchToolkit.llm_client")
     async def test_web_qa_with_question(self, mock_llm, mock_get_web_content, search_toolkit):
         """Test web Q&A with a specific question."""
         # Mock content extraction
@@ -122,8 +122,8 @@ class TestSearchToolkit:
         # LLM is called twice: once for answering and once for extracting related links
         assert mock_llm.completion.call_count == 2
 
-    @patch("cogents_tools.toolkits.search_toolkit.SearchToolkit.get_web_content")
-    @patch("cogents_tools.toolkits.search_toolkit.SearchToolkit.llm_client")
+    @patch("cogents_smith.toolkits.search_toolkit.SearchToolkit.get_web_content")
+    @patch("cogents_smith.toolkits.search_toolkit.SearchToolkit.llm_client")
     async def test_web_qa_summary(self, mock_llm, mock_get_web_content, search_toolkit):
         """Test web Q&A for content summary."""
         # Mock content extraction
@@ -175,7 +175,7 @@ class TestSearchToolkit:
             result_count = result.count("Result ")
             assert result_count <= num_results
 
-    @patch("cogents_tools.integrations.search.TavilySearchWrapper")
+    @patch("cogents_smith.integrations.search.TavilySearchWrapper")
     async def test_tavily_search_success(self, mock_tavily_wrapper, search_toolkit):
         """Test successful Tavily search."""
         # Mock TavilySearchWrapper
@@ -183,7 +183,7 @@ class TestSearchToolkit:
         mock_tavily_wrapper.return_value = mock_instance
 
         # Mock search result
-        from cogents_tools.integrations.search import SearchResult, SourceItem
+        from cogents_smith.integrations.search import SearchResult, SourceItem
 
         mock_sources = [
             SourceItem(title="Test Result 1", url="https://example1.com", content="Test content 1"),
@@ -202,7 +202,7 @@ class TestSearchToolkit:
         assert result.answer == "This is a test answer"
         mock_instance.search.assert_called_once_with(query="test query")
 
-    @patch("cogents_tools.integrations.search.TavilySearchWrapper")
+    @patch("cogents_smith.integrations.search.TavilySearchWrapper")
     async def test_tavily_search_error(self, mock_tavily_wrapper, search_toolkit):
         """Test Tavily search error handling."""
         # Mock TavilySearchWrapper to raise exception
@@ -211,7 +211,7 @@ class TestSearchToolkit:
         with pytest.raises(RuntimeError, match="Tavily search failed"):
             await search_toolkit.tavily_search("test query")
 
-    @patch("cogents_tools.integrations.search.GoogleAISearch")
+    @patch("cogents_smith.integrations.search.GoogleAISearch")
     async def test_google_ai_search_success(self, mock_google_ai, search_toolkit):
         """Test successful Google AI search."""
         # Mock GoogleAISearch
@@ -219,7 +219,7 @@ class TestSearchToolkit:
         mock_google_ai.return_value = mock_instance
 
         # Mock search result
-        from cogents_tools.integrations.search import SearchResult, SourceItem
+        from cogents_smith.integrations.search import SearchResult, SourceItem
 
         mock_sources = [
             SourceItem(
@@ -243,7 +243,7 @@ class TestSearchToolkit:
             query="AI research trends", model="gemini-2.5-flash", temperature=0.0
         )
 
-    @patch("cogents_tools.integrations.search.GoogleAISearch")
+    @patch("cogents_smith.integrations.search.GoogleAISearch")
     async def test_google_ai_search_error(self, mock_google_ai, search_toolkit):
         """Test Google AI search error handling."""
         # Mock GoogleAISearch to raise exception
@@ -255,11 +255,11 @@ class TestSearchToolkit:
     @pytest.mark.parametrize("search_depth", ["basic", "advanced"])
     async def test_tavily_search_depth_options(self, search_depth, search_toolkit):
         """Test Tavily search with different depth options."""
-        with patch("cogents_tools.integrations.search.TavilySearchWrapper") as mock_wrapper:
+        with patch("cogents_smith.integrations.search.TavilySearchWrapper") as mock_wrapper:
             mock_instance = Mock()  # Use regular Mock, not AsyncMock
             mock_wrapper.return_value = mock_instance
 
-            from cogents_tools.integrations.search import SearchResult
+            from cogents_smith.integrations.search import SearchResult
 
             mock_instance.search.return_value = SearchResult(query="test", sources=[], answer=None)
 
@@ -273,11 +273,11 @@ class TestSearchToolkit:
     @pytest.mark.parametrize("model", ["gemini-2.5-flash", "gemini-2.0-flash-exp"])
     async def test_google_ai_search_model_options(self, model, search_toolkit):
         """Test Google AI search with different model options."""
-        with patch("cogents_tools.integrations.search.GoogleAISearch") as mock_google:
+        with patch("cogents_smith.integrations.search.GoogleAISearch") as mock_google:
             mock_instance = Mock()  # Use regular Mock, not AsyncMock
             mock_google.return_value = mock_instance
 
-            from cogents_tools.integrations.search import SearchResult
+            from cogents_smith.integrations.search import SearchResult
 
             mock_instance.search.return_value = SearchResult(query="test", sources=[], answer=None)
 
