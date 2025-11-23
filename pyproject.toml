@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cogents-smith"
-version = "0.2.0"
+version = "0.2.2"
 description = "Agentic toolkit for COGENTS"
 readme = "README.md"
 license = "MIT"
