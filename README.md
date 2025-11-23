@@ -8,7 +8,7 @@ This is part of [project COGENTS](https://github.com/caesar0301/cogents), an ini
 
 ## 🎯 Core Capabilities
 
-Cogents-smith has evolved into a mature, production-ready toolkit ecosystem featuring **semantic organization**. The project now offers **18 specialized toolkits** organized into **10 semantic groups**, providing comprehensive coverage for cognitive agent development, plus **2 production-ready agents** for specialized tasks.
+Cogents-smith has evolved into a mature, production-ready toolkit ecosystem featuring **semantic organization**. The project now offers **18 specialized toolkits** organized into **10 semantic groups**, providing comprehensive coverage for cognitive agent development, plus **1 production-ready agent** for specialized tasks.
 
 #### Toolkit Ecosystem (18 Tools)
 - **Academic Research**: arXiv integration for paper discovery and analysis

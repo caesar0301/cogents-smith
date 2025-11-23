@@ -1,5 +1,5 @@
 """
-Prompts for the SeekraAgent agent.
+Prompts for the DeepResearchAgent agent.
 """
 
 query_writer_instructions = """Your goal is to generate sophisticated and diverse web search queries for research. These queries are intended for an advanced automated web research tool capable of analyzing complex results, following links, and synthesizing information.
@@ -8,10 +8,11 @@ Instructions:
 - Always prefer a single search query, only add another query if the original question requests multiple aspects or elements and one query is not enough.
 - Each query should focus on one specific aspect of the original question.
 - Don't produce more than {number_queries} queries.
+- Each query should be LESS than 40 characters.
+- Rewritten queries should be in the same language as the original query.
 - Queries should be diverse, if the topic is broad, generate more than 1 query.
 - Don't generate multiple similar queries, 1 is enough.
 - Query should ensure that the most current information is gathered. The current date is {current_date}.
-- Focus on gathering comprehensive, accurate, and up-to-date information relevant to the research topic.
 
 Format:
 - Format your response as a JSON object with ALL three of these exact keys:
@@ -24,7 +25,7 @@ Topic: Research the latest developments in renewable energy
 ```json
 {{
     "rationale": "To gather comprehensive information about renewable energy developments, we need current data on technological advances, market trends, and policy updates. These queries target the specific information needed for thorough research.",
-    "query": ["renewable energy latest developments 2024", "solar power technology advances", "renewable energy market trends"]
+    "query": ["renewable energy development 2024", "solar power technology advances", "renewable energy market trends"]
 }}
 ```
 
@@ -36,12 +37,9 @@ reflection_instructions = """You are an expert research assistant analyzing summ
 Instructions:
 - Identify knowledge gaps or areas that need deeper exploration and generate a follow-up query. (1 or multiple).
 - If provided summaries are sufficient to answer the user's question, don't generate a follow-up query.
-- If there is a knowledge gap, generate a follow-up query that would help expand your understanding.
+- The follow-up query should be less than 40 characters.
+- The follow-up query should be in the same language as the original query.
 - Focus on gathering comprehensive and accurate information relevant to the research topic.
-- Consider missing information about current conditions, recent developments, or specific aspects of the topic.
-
-Requirements:
-- Ensure the follow-up query is self-contained and includes necessary context for web search.
 
 Output Format:
 - Format your response as a JSON object with these exact keys:
@@ -54,7 +52,7 @@ Example:
 {{
     "is_sufficient": true, // or false
     "knowledge_gap": "The summary lacks information about recent developments and current market conditions", // "" if is_sufficient is true
-    "follow_up_queries": ["What are the latest developments in [topic] for 2024?"] // [] if is_sufficient is true
+    "follow_up_queries": ["example follow-up query"] // [] if is_sufficient is true
 }}
 ```
 

@@ -24,7 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.11.5"
 dependencies = [
     "cogents-core>=0.1.9,<0.2.0",
     "aiohttp>=3.12.15",
@@ -52,6 +52,8 @@ dependencies = [
     "google-auth>=2.40.3",
     # info retrieval
     "wikipedia-api>=0.6.0",
+    # browser-use
+    "cogents-browser-use>=0.1.1,<0.2.0",
 ]
 
 [project.urls]
@@ -78,7 +80,6 @@ where = ["."]
 include = ["cogents_smith*"]
 
 [tool.setuptools.package-data]
-"cogents_smith.agents.seekra_agent" = ["*.md"]
 "cogents_smith.agents.askura_agent" = ["*.md"]
 
 [tool.black]

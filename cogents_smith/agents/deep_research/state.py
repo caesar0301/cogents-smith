@@ -1,5 +1,5 @@
 """
-State definitions for the SeekraAgent agent.
+State definitions for the DeepResearchAgent agent.
 """
 
 from __future__ import annotations
@@ -21,7 +21,6 @@ class ResearchState(TypedDict):
     initial_search_query_count: int
     max_research_loops: int
     research_loop_count: int
-    reasoning_model: str
     context: Dict[str, Any]
 
 

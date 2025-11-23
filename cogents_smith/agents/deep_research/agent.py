@@ -1,5 +1,5 @@
 """
-SeekraAgent implementation using LangGraph and LLM integration.
+DeepResearchAgent implementation using LangGraph and LLM integration.
 Enhanced base class designed for extensibility.
 """
 
@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
 from cogents_core.agent import BaseResearcher, ResearchOutput
+from cogents_core.llm import BaseLLMClient
 from cogents_core.utils.logging import get_logger
 from cogents_core.utils.typing import override
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage
@@ -14,7 +15,6 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
 
-from .configuration import Configuration
 from .prompts import answer_instructions, query_writer_instructions, reflection_instructions
 from .schemas import Reflection, SearchQueryList
 from .state import QueryState, ReflectionState, ResearchState, WebSearchState
@@ -28,51 +28,59 @@ def get_current_date() -> str:
     return datetime.now().strftime("%B %d, %Y")
 
 
-class SeekraAgent(BaseResearcher):
+class DeepResearchAgent(BaseResearcher):
     """
     Advanced research agent using LangGraph and LLM integration.
-    Base class designed for extensibility with hooks for specialized researchers.
-
-    To create a specialized researcher, inherit from this class and override:
-    - get_prompts(): Return domain-specific prompts
-    - get_state_class(): Return domain-specific state class
-    - customize_initial_state(): Add domain-specific state fields
-    - preprocess_research_topic(): Enhance research topic preprocessing
-    - generate_fallback_queries(): Customize fallback query generation
-    - customize_reflection_fallback(): Customize reflection logic
-    - format_final_answer(): Customize final answer formatting
     """
 
     def __init__(
         self,
-        configuration: Optional[Configuration] = None,
-        llm_provider: str = "openrouter",
-        model_name: Optional[str] = None,
+        llm_provider: str = "openai",
+        query_generation_llm: BaseLLMClient | None = None,
+        reflection_llm: BaseLLMClient | None = None,
+        number_of_initial_queries: int = 3,
+        max_research_loops: int = 3,
+        query_generation_temperature: float = 0.7,
+        query_generation_max_tokens: int = 1000,
+        web_search_temperature: float = 0.2,
+        web_search_max_tokens: int = 10000,
+        web_search_citation_enabled: bool = True,
+        reflection_temperature: float = 0.5,
+        reflection_max_tokens: int = 1000,
+        answer_temperature: float = 0.3,
+        answer_max_tokens: int = 100000,
+        search_engines: List[str] = ["tavily", "duckduckgo"],
+        max_results_per_engine: int = 5,
+        search_timeout: int = 30,
     ):
         """
-        Initialize the SeekraAgent.
-        Requires OPENROUTER_API_KEY, GEMINI_API_KEY, and instructor library.
-        OPENROUTER_API_KEY is required for LLM functionality.
-        GEMINI_API_KEY is required for real web search capabilities.
-
-        Args:
-            configuration: Optional Configuration instance. If not provided,
-                          will use default configuration from environment.
-            llm_provider: LLM provider to use
-            model_name: Specific model name to use
+        Initialize the DeepResearchAgent.
         """
         # Initialize base class
-        super().__init__(llm_provider=llm_provider, model_name=model_name)
+        super().__init__(llm_provider=llm_provider)
 
         # Override the LLM client with instructor support if needed
         # Base class already initializes self.llm, so we can reuse it
         self.llm_client = self.llm
+        self.query_generation_llm = query_generation_llm if query_generation_llm else self.llm
+        self.reflection_llm = reflection_llm if reflection_llm else self.llm
+        self.number_of_initial_queries = number_of_initial_queries
+        self.max_research_loops = max_research_loops
+        self.query_generation_temperature = query_generation_temperature
+        self.query_generation_max_tokens = query_generation_max_tokens
+        self.web_search_temperature = web_search_temperature
+        self.web_search_max_tokens = web_search_max_tokens
+        self.web_search_citation_enabled = web_search_citation_enabled
+        self.reflection_temperature = reflection_temperature
+        self.reflection_max_tokens = reflection_max_tokens
+        self.answer_temperature = answer_temperature
+        self.answer_max_tokens = answer_max_tokens
+        self.search_engines = search_engines
+        self.max_results_per_engine = max_results_per_engine
+        self.search_timeout = search_timeout
 
         # Load prompts (can be overridden by subclasses)
         self.prompts = self.get_prompts()
-
-        # Set configuration (use provided config or create from environment)
-        self.configuration = configuration or Configuration()
 
         # Create the research graph
         self.graph = self._build_graph()
@@ -96,13 +104,7 @@ class SeekraAgent(BaseResearcher):
 
         # Add nodes
         workflow.add_node("generate_query", self._generate_query_node)
-        if self.configuration.search_engine == "tavily":
-            workflow.add_node("web_research", self._tavily_research_node)
-        elif self.configuration.search_engine == "google":
-            workflow.add_node("web_research", self._google_research_node)
-        else:
-            workflow.add_node("web_research", self._google_research_node)
-
+        workflow.add_node("web_research", self._research_node)
         workflow.add_node("reflection", self._reflection_node)
         workflow.add_node("finalize_answer", self._finalize_answer_node)
 
@@ -118,7 +120,7 @@ class SeekraAgent(BaseResearcher):
         return workflow.compile()
 
     @override
-    def research(
+    async def research(
         self,
         user_message: str,
         context: Dict[str, Any] = None,
@@ -137,13 +139,21 @@ class SeekraAgent(BaseResearcher):
         """
         try:
             # Initialize state (can be customized by subclasses)
-            initial_state = self.customize_initial_state(user_message, context or {})
-
+            initial_state = {
+                "messages": [HumanMessage(content=user_message)],
+                "context": context,
+                "search_query": [],
+                "web_research_result": [],
+                "sources_gathered": [],
+                "initial_search_query_count": self.number_of_initial_queries,
+                "max_research_loops": self.max_research_loops,
+                "research_loop_count": 0,
+            }
             # Run the research graph with optional runtime configuration
             if config:
-                result = self.graph.invoke(initial_state, config=config)
+                result = await self.graph.ainvoke(initial_state, config=config)
             else:
-                result = self.graph.invoke(initial_state)
+                result = await self.graph.ainvoke(initial_state)
 
             # Extract the final AI message
             final_message = None
@@ -177,31 +187,7 @@ class SeekraAgent(BaseResearcher):
             "answer": answer_instructions,
         }
 
-    def customize_initial_state(self, user_message: str, context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Customize the initial state for research.
-        Override this method in subclasses to add domain-specific state.
-
-        Args:
-            user_message: User's research request
-            context: Additional context for research
-
-        Returns:
-            Dictionary containing the initial state
-        """
-        return {
-            "messages": [HumanMessage(content=user_message)],
-            "context": context,
-            "search_query": [],
-            "web_research_result": [],
-            "sources_gathered": [],
-            "initial_search_query_count": self.configuration.number_of_initial_queries,
-            "max_research_loops": self.configuration.max_research_loops,
-            "research_loop_count": 0,
-            "reasoning_model": self.configuration.reflection_model,
-        }
-
-    def preprocess_research_topic(self, messages: List[AnyMessage]) -> str:
+    def _preprocess_research_topic(self, messages: List[AnyMessage]) -> str:
         """
         Get the research topic from the messages.
 
@@ -223,85 +209,17 @@ class SeekraAgent(BaseResearcher):
                     research_topic += f"Assistant: {message.content}\n"
         return research_topic
 
-    def generate_fallback_queries(self, prompt: str) -> List[str]:
-        """
-        Generate fallback queries when structured generation fails.
-        Override this method in subclasses for domain-specific fallback logic.
-
-        Args:
-            prompt: The formatted prompt
-
-        Returns:
-            List of fallback queries
-        """
-        # Simple fallback extraction when instructor fails
-        lines = prompt.split("\n")
-        queries = []
-
-        for line in lines:
-            line = line.strip()
-            if line and not line.startswith("#") and not line.startswith("```"):
-                # Simple heuristic to identify queries
-                if len(line) > 10 and len(line) < 100:  # Reasonable query length
-                    queries.append(line)
-
-        # Limit to initial query count from configuration
-        return queries[: self.configuration.number_of_initial_queries]
-
-    def customize_reflection_fallback(self, state: ResearchState, research_loop_count: int) -> Dict[str, Any]:
-        """
-        Customize reflection fallback behavior.
-        Override this method in subclasses for domain-specific reflection logic.
-
-        Args:
-            state: Current research state
-            research_loop_count: Current loop count
-
-        Returns:
-            Dictionary containing reflection results
-        """
-        is_sufficient = research_loop_count >= self.configuration.max_research_loops
-        knowledge_gap = "" if is_sufficient else "Need more specific information and practical details"
-        follow_up_queries = (
-            []
-            if is_sufficient
-            else [f"More details about {self.preprocess_research_topic(state['messages'])} and practical information"]
-        )
-
-        return {
-            "is_sufficient": is_sufficient,
-            "knowledge_gap": knowledge_gap,
-            "follow_up_queries": follow_up_queries,
-        }
-
-    def format_final_answer(self, final_answer: str, sources: List[Dict[str, Any]]) -> str:
-        """
-        Format the final research answer.
-        Override this method in subclasses for domain-specific formatting.
-
-        Args:
-            final_answer: Generated final answer
-            sources: List of sources gathered during research
-
-        Returns:
-            Formatted final answer
-        """
-        return final_answer
-
     def _generate_query_node(self, state: ResearchState, config: RunnableConfig) -> QueryState:
         """Generate search queries based on user request using instructor structured output."""
         # Get research topic from messages (can be customized by subclasses)
-        research_topic = self.preprocess_research_topic(state["messages"])
-
-        # Get configuration from RunnableConfig or use instance configuration
-        runnable_config = Configuration.from_runnable_config(config) if config else self.configuration
+        research_topic = self._preprocess_research_topic(state["messages"])
 
         # Format the prompt
         current_date = get_current_date()
         formatted_prompt = self.prompts["query_writer"].format(
             current_date=current_date,
             research_topic=research_topic,
-            number_queries=state.get("initial_search_query_count", runnable_config.number_of_initial_queries),
+            number_queries=state.get("initial_search_query_count", self.number_of_initial_queries),
         )
 
         try:
@@ -309,8 +227,8 @@ class SeekraAgent(BaseResearcher):
             result: SearchQueryList = self.llm_client.structured_completion(
                 messages=[{"role": "user", "content": formatted_prompt}],
                 response_model=SearchQueryList,
-                temperature=runnable_config.query_generation_temperature,
-                max_tokens=runnable_config.query_generation_max_tokens,
+                temperature=self.query_generation_temperature,
+                max_tokens=self.query_generation_max_tokens,
             )
 
             logger.info(f"Generated {len(result.query)} queries: {result.query}, rationale: {result.rationale}")
@@ -320,11 +238,7 @@ class SeekraAgent(BaseResearcher):
             return {"query_list": query_list}
 
         except Exception as e:
-            logger.error(f"Error in structured query generation: {e}")
-            # Fallback to domain-specific extraction (can be customized by subclasses)
-            queries = self.generate_fallback_queries(formatted_prompt)
-            query_list = [{"query": q, "rationale": "Generated for research"} for q in queries]
-            return {"query_list": query_list}
+            raise RuntimeError(f"Error in structured query generation: {e}")
 
     def _continue_to_web_research(self, state: QueryState) -> List[Send]:
         """Send queries to web research nodes."""
@@ -336,22 +250,22 @@ class SeekraAgent(BaseResearcher):
             for idx, item in enumerate(state["query_list"])
         ]
 
-    def _tavily_research_node(self, state: WebSearchState, config: RunnableConfig) -> ResearchState:
+    async def _research_node(self, state: WebSearchState, config: RunnableConfig) -> ResearchState:
         """Perform web research using Tavily Search API."""
         search_query = state["search_query"]
 
-        # Get configuration from RunnableConfig or use instance configuration
-        runnable_config = Configuration.from_runnable_config(config) if config else self.configuration
-
-        # Use the TavilySearchWrapper
-        from cogents.ingreds.web_search import TavilySearchWrapper
-
         try:
-            # Initialize Tavily Search client
-            tavily_search = TavilySearchWrapper()
+            from wizsearch import WizSearch, WizSearchConfig
 
-            # Perform search using Tavily
-            result = tavily_search.search(query=search_query)
+            omnisearch = WizSearch(
+                config=WizSearchConfig(
+                    enabled_engines=self.search_engines,
+                    max_results_per_engine=self.max_results_per_engine,
+                    timeout=self.search_timeout,
+                )
+            )
+
+            result = await omnisearch.search(query=search_query)
 
             # Convert SearchResult objects to dictionaries for compatibility
             sources_gathered = []
@@ -379,8 +293,8 @@ class SeekraAgent(BaseResearcher):
 
                 search_summary = self.llm_client.completion(
                     messages=[{"role": "user", "content": summary_prompt}],
-                    temperature=runnable_config.web_search_temperature,
-                    max_tokens=runnable_config.web_search_max_tokens,
+                    temperature=self.web_search_temperature,
+                    max_tokens=self.web_search_max_tokens,
                 )
             else:
                 search_summary = f"No relevant sources found for: {search_query}"
@@ -395,51 +309,14 @@ class SeekraAgent(BaseResearcher):
             logger.error(f"Error in Tavily web search: {e}")
             raise RuntimeError(f"Tavily web search failed: {str(e)}")
 
-    def _google_research_node(self, state: WebSearchState, config: RunnableConfig) -> ResearchState:
-        """Perform web research using real Google Search API or LLM simulation."""
-        from cogents.ingreds.web_search import GoogleAISearch
-
-        try:
-            search_query = state["search_query"]
-
-            # Initialize Google AI Search client
-            google_search = GoogleAISearch()
-
-            # Get configuration from RunnableConfig or use instance configuration
-            runnable_config = Configuration.from_runnable_config(config) if config else self.configuration
-
-            # Perform search using the new module
-            result = google_search.search(
-                query=search_query,
-                model=runnable_config.web_search_model.split("/")[-1],
-            )
-
-            # Convert SourceInfo objects back to dictionaries for compatibility
-            sources_gathered = []
-            for source in result.sources:
-                sources_gathered.append(source.model_dump())
-
-            return ResearchState(
-                sources_gathered=sources_gathered,
-                search_query=[search_query],
-                search_summaries=[result.answer],
-            )
-
-        except Exception as e:
-            logger.error(f"Error in real web search: {e}")
-            raise RuntimeError(f"Web search failed: {str(e)}")
-
     def _reflection_node(self, state: ResearchState, config: RunnableConfig) -> ReflectionState:
         """Reflect on research results and identify gaps using instructor structured output."""
         # Increment research loop count
         research_loop_count = state.get("research_loop_count", 0) + 1
 
-        # Get configuration from RunnableConfig or use instance configuration
-        runnable_config = Configuration.from_runnable_config(config) if config else self.configuration
-
         # Format the prompt
         current_date = get_current_date()
-        research_topic = self.preprocess_research_topic(state["messages"])
+        research_topic = self._preprocess_research_topic(state["messages"])
         summaries = "\n\n---\n\n".join(state.get("search_summaries", []))
 
         formatted_prompt = self.prompts["reflection"].format(
@@ -453,8 +330,8 @@ class SeekraAgent(BaseResearcher):
             result: Reflection = self.llm_client.structured_completion(
                 messages=[{"role": "user", "content": formatted_prompt}],
                 response_model=Reflection,
-                temperature=runnable_config.reflection_temperature,
-                max_tokens=runnable_config.reflection_max_tokens,
+                temperature=self.reflection_temperature,
+                max_tokens=self.reflection_max_tokens,
             )
 
             return ReflectionState(
@@ -466,22 +343,12 @@ class SeekraAgent(BaseResearcher):
             )
 
         except Exception as e:
-            logger.error(f"Error in structured reflection: {e}")
-            # Use customizable fallback logic
-            fallback_results = self.customize_reflection_fallback(state, research_loop_count)
-
-            return ReflectionState(
-                **fallback_results,
-                research_loop_count=research_loop_count,
-                number_of_ran_queries=len(state.get("search_query", [])),
-            )
+            raise RuntimeError(f"Error in structured reflection: {e}")
 
     def _evaluate_research(self, state: ReflectionState, config: RunnableConfig):
         """Evaluate research and decide next step."""
-        # Get configuration from RunnableConfig or use instance configuration
-        runnable_config = Configuration.from_runnable_config(config) if config else self.configuration
 
-        if state["is_sufficient"] or state["research_loop_count"] >= runnable_config.max_research_loops:
+        if state["is_sufficient"] or state["research_loop_count"] >= self.max_research_loops:
             return "finalize_answer"
         else:
             return [
@@ -494,11 +361,8 @@ class SeekraAgent(BaseResearcher):
 
     def _finalize_answer_node(self, state: ResearchState, config: RunnableConfig):
         """Finalize the research answer with advanced formatting and citations."""
-        # Get configuration from RunnableConfig or use instance configuration
-        runnable_config = Configuration.from_runnable_config(config) if config else self.configuration
-
         current_date = get_current_date()
-        research_topic = self.preprocess_research_topic(state["messages"])
+        research_topic = self._preprocess_research_topic(state["messages"])
         summaries = "\n---\n\n".join(state.get("search_summaries", []))
 
         formatted_prompt = self.prompts["answer"].format(
@@ -510,15 +374,11 @@ class SeekraAgent(BaseResearcher):
         # Generate final answer using LLM
         final_answer = self.llm_client.completion(
             messages=[{"role": "user", "content": formatted_prompt}],
-            temperature=runnable_config.answer_temperature,
-            max_tokens=runnable_config.answer_max_tokens,
+            temperature=self.answer_temperature,
+            max_tokens=self.answer_max_tokens,
         )
 
-        # Process sources and format summary (can be customized by subclasses)
-        sources = state.get("sources_gathered", [])
-        formatted_summary = self.format_final_answer(final_answer, sources)
-
         return {
-            "messages": [AIMessage(content=formatted_summary)],
-            "sources_gathered": sources,
+            "messages": [AIMessage(content=final_answer)],
+            "sources_gathered": state.get("sources_gathered", []),
         }

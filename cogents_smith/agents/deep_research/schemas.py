@@ -1,5 +1,5 @@
 """
-Pydantic schemas for structured LLM output in the SeekraAgent module.
+Pydantic schemas for structured LLM output in the DeepResearchAgent module.
 Enhanced for use with instructor library.
 """
 
