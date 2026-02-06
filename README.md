@@ -1,5 +1,7 @@
 # CogentsSmith
 
+>  🗣️🗣️🗣️ This project has been archived since 2026-02 and contributed to [Mirasoth's Noesium](https://github.com/mirasoth/noesium/tree/main/noesium/toolkits).
+
 [![CI](https://github.com/caesar0301/cogents-smith/actions/workflows/ci.yml/badge.svg)](https://github.com/caesar0301/cogents-smith/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/cogents-smith.svg)](https://pypi.org/project/cogents-smith/)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/caesar0301/cogents-smith)
